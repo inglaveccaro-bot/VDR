@@ -845,8 +845,40 @@ Impianto IRAI di rivelazione fumo e calore con livello di prestazione III per la
 
 <div id="toast">✅ Documento generato!</div>
 
-<!-- docx.js -->
-<script src="https://unpkg.com/docx@8.5.0/build/index.js"></script>
+<script>
+// Carica docx.js dinamicamente con fallback
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+async function loadDocx() {
+  const cdns = [
+    'https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js',
+    'https://unpkg.com/docx@8.5.0/build/index.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/index.js',
+  ];
+  for (const cdn of cdns) {
+    try {
+      await loadScript(cdn);
+      if (typeof docx !== 'undefined') {
+        console.log('docx caricato da:', cdn);
+        return true;
+      }
+    } catch(e) {
+      console.warn('Fallito:', cdn);
+    }
+  }
+  return false;
+}
+
+window._docxReady = loadDocx();
+</script>
 <script>
 // ============================================================
 // DATA
@@ -1166,6 +1198,12 @@ async function generateDoc() {
   btn.disabled = true; btn.textContent = '⏳';
 
   try {
+    // Aspetta che la libreria sia caricata
+    const loaded = await window._docxReady;
+    if (!loaded || typeof docx === 'undefined') {
+      throw new Error('Libreria docx.js non disponibile. Controlla la connessione internet e riprova.');
+    }
+
     const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
             HeadingLevel, AlignmentType, BorderStyle, WidthType, ShadingType,
             LevelFormat, UnderlineType } = docx;
