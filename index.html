@@ -4,626 +4,235 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Rischio Incendio</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<title>Rischio Incendio DVR</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#f2f2f7;--card:#fff;--accent:#e85d26;--text:#1c1c1e;--muted:#8e8e93;
+  --border:#e5e5ea;--hh:56px;--tbh:60px;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px)
+}
+body{font-family:-apple-system,sans-serif;background:var(--bg);color:var(--text);font-size:15px;-webkit-font-smoothing:antialiased}
 
-:root {
-  --bg: #f2f2f7;
-  --card: #ffffff;
-  --accent: #e85d26;
-  --accent2: #f5a623;
-  --text: #1c1c1e;
-  --muted: #8e8e93;
-  --border: #e5e5ea;
-  --input-bg: #f2f2f7;
-  --header-h: 56px;
-  --tab-h: 60px;
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-}
+/* HEADER */
+.hdr{position:fixed;top:0;left:0;right:0;height:calc(var(--hh) + var(--st));padding-top:var(--st);background:rgba(255,255,255,0.95);border-bottom:1px solid var(--border);display:flex;align-items:center;padding-left:16px;padding-right:16px;gap:10px;z-index:200}
+.hdr-icon{width:32px;height:32px;background:linear-gradient(135deg,#e85d26,#f5a623);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.hdr-title{font-size:15px;font-weight:700;flex:1}
+.hdr-sub{font-size:11px;color:var(--muted)}
+.gen-btn{background:var(--accent);color:#fff;border:none;border-radius:20px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.gen-btn:active{opacity:0.7}
+.gen-btn:disabled{opacity:0.4}
 
-body {
-  font-family: 'Inter', -apple-system, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  font-size: 15px;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+/* SCROLL */
+.scroll{position:fixed;top:calc(var(--hh) + var(--st));left:0;right:0;bottom:calc(var(--tbh) + var(--sb));overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 16px 24px}
 
-/* ---- HEADER ---- */
-.app-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: var(--header-h);
-  background: rgba(255,255,255,0.92);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  padding-top: env(safe-area-inset-top, 0px);
-  z-index: 100;
-  gap: 10px;
-}
-.header-icon {
-  width: 32px; height: 32px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 16px; flex-shrink: 0;
-}
-.header-title { font-size: 15px; font-weight: 700; flex: 1; }
-.header-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+/* TAB BAR */
+.tabs{position:fixed;bottom:0;left:0;right:0;height:calc(var(--tbh) + var(--sb));padding-bottom:var(--sb);background:rgba(255,255,255,0.97);border-top:1px solid var(--border);display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;z-index:200}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 14px;cursor:pointer;min-width:60px;border:none;background:none}
+.tab-ico{font-size:20px;line-height:1}
+.tab-lbl{font-size:9px;font-weight:500;color:var(--muted);white-space:nowrap}
+.tab.active .tab-lbl{color:var(--accent);font-weight:700}
+.tab-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);display:none}
+.tab.active .tab-dot{display:block}
 
-.gen-btn {
-  background: var(--accent);
-  color: #fff;
-  border: none;
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-family: 'Inter', sans-serif;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-  flex-shrink: 0;
-  -webkit-appearance: none;
-}
-.gen-btn:active { opacity: 0.75; }
-.gen-btn:disabled { opacity: 0.4; }
+/* SECTIONS */
+.sec{display:none}
+.sec.active{display:block}
 
-/* ---- SCROLL AREA ---- */
-.scroll-area {
-  position: fixed;
-  top: var(--header-h);
-  left: 0; right: 0;
-  bottom: calc(var(--tab-h) + var(--safe-bottom));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 16px 0 20px;
-}
+/* SEC HEADER */
+.sec-hd{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sec-badge{width:36px;height:36px;background:linear-gradient(135deg,#e85d26,#f5a623);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sec-title{font-size:18px;font-weight:700}
+.sec-sub{font-size:12px;color:var(--muted);margin-top:1px}
 
-/* ---- TAB BAR ---- */
-.tab-bar {
-  position: fixed;
-  bottom: 0; left: 0; right: 0;
-  height: calc(var(--tab-h) + var(--safe-bottom));
-  padding-bottom: var(--safe-bottom);
-  background: rgba(255,255,255,0.95);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-top: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  z-index: 100;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.tab-bar::-webkit-scrollbar { display: none; }
+/* CARDS */
+.card{background:var(--card);border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.card-lbl{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;padding:12px 16px 0}
 
-.tab-item {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 6px 14px;
-  cursor: pointer;
-  min-width: 64px;
-}
-.tab-icon { font-size: 20px; line-height: 1; }
-.tab-label {
-  font-size: 9px;
-  font-weight: 500;
-  color: var(--muted);
-  white-space: nowrap;
-  text-align: center;
-}
-.tab-item.active .tab-label { color: var(--accent); font-weight: 700; }
-.tab-item.active .tab-icon { filter: none; }
-.tab-active-dot {
-  width: 4px; height: 4px;
-  border-radius: 50%;
-  background: var(--accent);
-  display: none;
-}
-.tab-item.active .tab-active-dot { display: block; }
+/* FORM ROWS */
+.row{display:flex;flex-direction:column;padding:10px 16px;border-bottom:1px solid var(--border);gap:4px}
+.row:last-child{border-bottom:none}
+.row.h{flex-direction:row;align-items:center;justify-content:space-between}
+.fl{font-size:12px;font-weight:500;color:var(--muted)}
+input[type=text],input[type=number],select,textarea{background:transparent;border:none;font-family:-apple-system,sans-serif;font-size:15px;color:var(--text);padding:0;width:100%;outline:none;-webkit-appearance:none}
+input[type=number]{-moz-appearance:textfield}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}
+textarea{resize:none;min-height:68px}
+.vr{font-size:15px;color:var(--text);text-align:right}
+select.vr{max-width:160px}
+input.vr{text-align:right;max-width:100px}
 
-/* ---- SECTIONS ---- */
-.section { display: none; padding: 0 16px; }
-.section.active { display: block; }
+/* ITEM CARDS */
+.ic{background:var(--card);border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.07)}
+.ic-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#f7f7f7;border-bottom:1px solid var(--border)}
+.ic-hd span{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px}
+.btn-rm{background:none;border:none;color:#ff3b30;font-size:13px;font-weight:700;cursor:pointer;padding:2px 0}
 
-/* ---- SECTION HEADER ---- */
-.sec-head {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 16px;
-}
-.sec-badge {
-  width: 36px; height: 36px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; flex-shrink: 0;
-}
-.sec-title { font-size: 18px; font-weight: 700; }
-.sec-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+/* REPEATER SIMPLE */
+.ri{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.ri:last-child{border-bottom:none}
+.ri input{flex:1;font-size:14px}
+.ri .sub{font-size:12px;color:var(--muted);margin-top:2px;padding:0 16px 8px}
+.btn-x{width:26px;height:26px;border-radius:50%;background:#ff3b30;border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 
-/* ---- CARDS ---- */
-.card {
-  background: var(--card);
-  border-radius: 14px;
-  padding: 0;
-  margin-bottom: 14px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-}
-.card-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--muted);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 12px 16px 0;
-  margin-bottom: 4px;
-}
+/* ADD BTN */
+.btn-add{width:100%;background:none;border:none;color:var(--accent);font-family:-apple-system,sans-serif;font-size:15px;font-weight:600;padding:13px 16px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:6px}
+.btn-add:active{opacity:0.6}
 
-/* ---- FORM ROWS ---- */
-.form-row {
-  display: flex;
-  flex-direction: column;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-  gap: 4px;
-}
-.form-row:last-child { border-bottom: none; }
-.form-row.row-h {
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-}
+/* TOGGLE */
+.tog-grp{display:flex;gap:8px;padding:4px 0 2px;flex-wrap:wrap}
+.tog{padding:6px 16px;border-radius:20px;border:1.5px solid var(--border);color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;background:#f7f7f7}
+.tog.on{border-color:var(--accent);color:var(--accent);background:rgba(232,93,38,0.08);font-weight:700}
 
-label.field-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--muted);
-  margin: 0;
-}
+/* NAV ARROWS */
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding:4px 0}
+.nav-btn{background:none;border:none;color:var(--accent);font-size:14px;font-weight:600;cursor:pointer;padding:8px 0}
+.nav-btn:disabled{color:var(--muted)}
+.nav-ind{font-size:12px;color:var(--muted)}
 
-input[type="text"],
-input[type="number"],
-select,
-textarea {
-  background: transparent;
-  border: none;
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  color: var(--text);
-  padding: 0;
-  width: 100%;
-  outline: none;
-  -webkit-appearance: none;
-}
-input[type="number"] { -moz-appearance: textfield; }
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; }
-textarea { resize: none; min-height: 72px; }
-select { cursor: pointer; }
-
-.val-right {
-  font-size: 15px;
-  color: var(--text);
-  text-align: right;
-  min-width: 120px;
-}
-select.val-right { max-width: 160px; }
-
-/* ---- REPEATER ---- */
-.repeater-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border);
-}
-.repeater-item:last-child { border-bottom: none; }
-.repeater-item input {
-  flex: 1;
-  font-size: 14px;
-}
-.btn-del {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  background: #ff3b30;
-  border: none;
-  color: #fff;
-  font-size: 14px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  flex-shrink: 0;
-  font-weight: 700;
-  -webkit-appearance: none;
-}
-.btn-del:active { opacity: 0.7; }
-
-.btn-add {
-  width: 100%;
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 12px 16px;
-  text-align: left;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 8px;
-  -webkit-appearance: none;
-}
-.btn-add:active { opacity: 0.6; }
-
-/* ---- COMP / FORNO CARDS ---- */
-.item-card {
-  background: var(--card);
-  border-radius: 14px;
-  margin-bottom: 10px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.07);
-}
-.item-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  background: var(--input-bg);
-  border-bottom: 1px solid var(--border);
-}
-.item-card-header span { font-size: 13px; font-weight: 600; color: var(--muted); }
-.btn-del-sm {
-  background: none;
-  border: none;
-  color: #ff3b30;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  -webkit-appearance: none;
-}
-
-/* ---- TOGGLE ---- */
-.toggle-group {
-  display: flex; gap: 6px; flex-wrap: wrap;
-  padding: 4px 0 2px;
-}
-.tog {
-  padding: 5px 12px;
-  border-radius: 20px;
-  border: 1.5px solid var(--border);
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  background: var(--input-bg);
-  -webkit-appearance: none;
-}
-.tog.on {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: rgba(232,93,38,0.08);
-  font-weight: 700;
-}
-
-/* ---- PILL ---- */
-.info-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  background: rgba(245,166,35,0.12);
-  border: 1px solid rgba(245,166,35,0.35);
-  color: #b07800;
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  margin-bottom: 10px;
-}
-
-/* ---- TOAST ---- */
-#toast {
-  position: fixed;
-  bottom: calc(var(--tab-h) + var(--safe-bottom) + 16px);
-  left: 50%;
-  transform: translateX(-50%) translateY(20px);
-  background: #1c1c1e;
-  color: #fff;
-  padding: 12px 20px;
-  border-radius: 20px;
-  font-size: 14px;
-  font-weight: 600;
-  opacity: 0;
-  transition: all 0.3s;
-  white-space: nowrap;
-  z-index: 999;
-  pointer-events: none;
-}
-#toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* ---- NAV ARROWS ---- */
-.nav-arrows {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 16px 4px;
-  margin-top: 4px;
-}
-.nav-arrow {
-  display: flex; align-items: center; gap: 6px;
-  color: var(--accent);
-  font-size: 14px;
-  font-weight: 600;
-  background: none; border: none;
-  cursor: pointer;
-  padding: 8px 0;
-  -webkit-appearance: none;
-}
-.nav-arrow:active { opacity: 0.6; }
-.nav-arrow.disabled { color: var(--muted); pointer-events: none; }
-.step-indicator {
-  font-size: 12px;
-  color: var(--muted);
-  font-weight: 500;
-}
+/* OVERLAY */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:flex-end;justify-content:center;z-index:999}
+.overlay-box{background:#fff;border-radius:20px 20px 0 0;padding:24px 20px calc(28px + var(--sb));width:100%;max-width:480px;font-family:-apple-system,sans-serif}
+.overlay-handle{width:36px;height:4px;background:#e5e5ea;border-radius:2px;margin:0 auto 18px}
+.overlay-title{font-size:20px;font-weight:700;margin-bottom:6px}
+.overlay-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.overlay-link{display:block;background:var(--accent);color:#fff;border-radius:14px;padding:16px;text-align:center;font-size:16px;font-weight:700;text-decoration:none;margin-bottom:10px}
+.overlay-hint{font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px;line-height:1.5}
+.overlay-close{width:100%;background:#f2f2f7;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:var(--text);cursor:pointer}
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="app-header">
-  <div class="header-icon">🔥</div>
-  <div style="flex:1;">
-    <div class="header-title">Rischio Incendio</div>
-    <div class="header-sub">Generatore DVR</div>
+<div class="hdr">
+  <div class="hdr-icon">🔥</div>
+  <div style="flex:1">
+    <div class="hdr-title">Rischio Incendio</div>
+    <div class="hdr-sub">Generatore DVR</div>
   </div>
   <button class="gen-btn" id="genBtn" onclick="generateDoc()">⬇ Genera</button>
 </div>
 
-<!-- SCROLL AREA -->
-<div class="scroll-area" id="scrollArea">
+<div class="scroll" id="scrollArea">
 
   <!-- S1 ANAGRAFICA -->
-  <div class="section active" id="s1">
-    <div class="sec-head">
-      <div class="sec-badge">🏭</div>
-      <div>
-        <div class="sec-title">Anagrafica</div>
-        <div class="sec-sub">Dati identificativi dell'opificio</div>
-      </div>
+  <div class="sec active" id="s1">
+    <div class="sec-hd"><div class="sec-badge">🏭</div><div><div class="sec-title">Anagrafica</div><div class="sec-sub">Dati identificativi dell'opificio</div></div></div>
+
+    <div class="card">
+      <div class="card-lbl">Attività</div>
+      <div class="row"><div class="fl">Tipo di produzione</div><input type="text" id="tipoAttivita" value="produzione di prodotti da forno"></div>
+      <div class="row h"><div class="fl">Comune</div><input type="text" id="comune" class="vr" value="Noci"></div>
+      <div class="row h"><div class="fl">Provincia</div><input type="text" id="provincia" class="vr" value="BA" style="max-width:50px"></div>
+      <div class="row"><div class="fl">Indirizzo</div><input type="text" id="indirizzo" value="Viale della Tecnica e dell'Innovazione"></div>
     </div>
 
     <div class="card">
-      <div class="card-title">Attività</div>
-      <div class="form-row">
-        <label class="field-label">Tipo di produzione</label>
-        <input type="text" id="tipoAttivita" value="produzione di prodotti da forno">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Comune</label>
-        <input type="text" id="comune" value="Noci" class="val-right" style="text-align:right">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Provincia</label>
-        <input type="text" id="provincia" value="BA" class="val-right" style="text-align:right; max-width:60px">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Indirizzo</label>
-        <input type="text" id="indirizzo" value="Viale della Tecnica e dell'Innovazione">
-      </div>
+      <div class="card-lbl">Motivazione della valutazione</div>
+      <div class="row"><textarea id="motivazione" rows="4">In seguito alla crescita del mercato e alla conseguente necessità di stoccaggio di una maggiore quantità di prodotti finiti, il responsabile dell'attività ha ritenuto opportuno sfruttare a pieno i magazzini a piano terra e di incrementare i forni per la produzione.</textarea></div>
     </div>
 
     <div class="card">
-      <div class="card-title">Motivazione della valutazione</div>
-      <div class="form-row">
-        <textarea id="motivazione" rows="4">In seguito alla crescita del mercato e alla conseguente necessità di stoccaggio di una maggiore quantità di prodotti finiti, il responsabile dell'attività ha ritenuto opportuno sfruttare a pieno i magazzini a piano terra e di incrementare i forni per la produzione.</textarea>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-title">Edificio</div>
-      <div class="form-row row-h">
-        <label class="field-label">Tipo edificio</label>
-        <select id="tipoEdificio" class="val-right">
+      <div class="card-lbl">Edificio</div>
+      <div class="row h"><div class="fl">Tipo edificio</div>
+        <select id="tipoEdificio" class="vr">
           <option value="isolato e dedicato">Isolato e dedicato</option>
           <option value="adiacente ad altri edifici">Adiacente</option>
           <option value="in complesso industriale">In complesso</option>
         </select>
       </div>
-      <div class="form-row row-h">
-        <label class="field-label">Aperto al pubblico</label>
-        <select id="apertoAlPubblico" class="val-right">
-          <option value="no">No</option>
-          <option value="si">Sì</option>
+      <div class="row h"><div class="fl">Aperto al pubblico</div>
+        <select id="apertoAlPubblico" class="vr">
+          <option value="no">No</option><option value="si">Sì</option>
         </select>
       </div>
-      <div class="form-row row-h">
-        <label class="field-label">Superficie totale edificio (m²)</label>
-        <input type="number" id="supTotale" value="0" class="val-right" style="text-align:right;max-width:80px">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Max occupanti totali</label>
-        <input type="number" id="maxOccupanti" value="20" class="val-right" style="text-align:right;max-width:60px">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Collegamento verticale</label>
-        <input type="text" id="collegamento" value="scala protetta e ascensore inserito in vano protetto">
-      </div>
+      <div class="row h"><div class="fl">Superficie totale (m²)</div><input type="number" id="supTotale" class="vr" value="0" style="max-width:80px"></div>
+      <div class="row h"><div class="fl">Max occupanti totali</div><input type="number" id="maxOccupanti" class="vr" value="20" style="max-width:60px"></div>
+      <div class="row"><div class="fl">Collegamento verticale</div><input type="text" id="collegamento" value="scala protetta e ascensore inserito in vano protetto"></div>
     </div>
 
     <div class="card">
-      <div class="card-title">Piani dell'edificio</div>
+      <div class="card-lbl">Piani dell'edificio</div>
       <div id="pianiList"></div>
       <button class="btn-add" onclick="addPiano()">＋ Aggiungi piano</button>
     </div>
   </div>
 
   <!-- S2 ATTIVITÀ -->
-  <div class="section" id="s2">
-    <div class="sec-head">
-      <div class="sec-badge">📋</div>
-      <div>
-        <div class="sec-title">Attività Soggette</div>
-        <div class="sec-sub">DPR 151/2011</div>
-      </div>
-    </div>
+  <div class="sec" id="s2">
+    <div class="sec-hd"><div class="sec-badge">📋</div><div><div class="sec-title">Attività Soggette</div><div class="sec-sub">DPR 151/2011</div></div></div>
 
     <div class="card">
-      <div class="card-title">Attività principale</div>
-      <div class="form-row row-h">
-        <label class="field-label">Numero</label>
-        <input type="text" id="attPrincNum" value="70.1.B" class="val-right" style="text-align:right;max-width:80px">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Piano</label>
-        <input type="text" id="attPrincPiano" value="piano terra" class="val-right" style="text-align:right">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Descrizione</label>
-        <textarea id="attPrincDesc" rows="3">Locali adibiti a depositi di superficie lorda superiore a 1.000 mq e fino a 3.000 mq con quantitativi di merci e materiali combustibili superiori complessivamente a 5.000 kg.</textarea>
-      </div>
+      <div class="card-lbl">Attività principale</div>
+      <div class="row h"><div class="fl">Numero</div><input type="text" id="attPrincNum" class="vr" value="70.1.B" style="max-width:80px"></div>
+      <div class="row h"><div class="fl">Piano</div><input type="text" id="attPrincPiano" class="vr" value="piano terra"></div>
+      <div class="row"><div class="fl">Descrizione</div><textarea id="attPrincDesc" rows="3">Locali adibiti a depositi di superficie lorda superiore a 1.000 mq e fino a 3.000 mq con quantitativi di merci e materiali combustibili superiori complessivamente a 5.000 kg.</textarea></div>
     </div>
 
-    <!-- ATTIVITÀ SECONDARIA — removibile -->
-    <div id="attSecCard" class="card">
-      <div class="item-card-header" style="background:none;border-bottom:1px solid var(--border);padding:10px 16px;">
-        <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;">Attività secondaria</span>
-        <button class="btn-del-sm" onclick="toggleAttSec(false)">Rimuovi</button>
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Numero</label>
-        <input type="text" id="attSecNum" value="74.1.A" class="val-right" style="text-align:right;max-width:80px">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Piano</label>
-        <input type="text" id="attSecPiano" value="piano primo" class="val-right" style="text-align:right">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Potenza totale (kW)</label>
-        <input type="number" id="potenzaTotale" value="349" class="val-right" style="text-align:right;max-width:70px">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Descrizione</label>
-        <textarea id="attSecDesc" rows="3">Impianti per la produzione di calore alimentati a combustibile solido, liquido o gassoso con potenzialità superiore a 116 kW e fino a 350 kW.</textarea>
-      </div>
+    <div class="ic" id="attSecCard">
+      <div class="ic-hd"><span>Attività secondaria</span><button class="btn-rm" onclick="toggleAttSec(false)">Rimuovi</button></div>
+      <div class="row h"><div class="fl">Numero</div><input type="text" id="attSecNum" class="vr" value="74.1.A" style="max-width:80px"></div>
+      <div class="row h"><div class="fl">Piano</div><input type="text" id="attSecPiano" class="vr" value="piano primo"></div>
+      <div class="row h"><div class="fl">Potenza totale (kW)</div><input type="number" id="potenzaTotale" class="vr" value="349" style="max-width:70px"></div>
+      <div class="row"><div class="fl">Descrizione</div><textarea id="attSecDesc" rows="3">Impianti per la produzione di calore alimentati a combustibile solido, liquido o gassoso con potenzialità superiore a 116 kW e fino a 350 kW.</textarea></div>
     </div>
-    <div class="card" id="attSecAdd" style="display:none;">
+    <div class="card" id="attSecAdd" style="display:none">
       <button class="btn-add" onclick="toggleAttSec(true)">＋ Aggiungi attività secondaria</button>
     </div>
 
     <div class="card">
-      <div class="card-title">Normativa applicabile</div>
+      <div class="card-lbl">Normativa applicabile</div>
       <div id="normativaList"></div>
       <button class="btn-add" onclick="addNormativa()">＋ Aggiungi norma</button>
     </div>
 
     <div class="card">
-      <div class="card-title">Classificazione rischio</div>
-      <div class="form-row">
-        <div class="toggle-group" id="toggleRischio">
-          <button class="tog" onclick="tog(this,'toggleRischio')">BASSO</button>
-          <button class="tog on" onclick="tog(this,'toggleRischio')">NON BASSO</button>
+      <div class="card-lbl">Classificazione rischio (D.M. 02/09/2021)</div>
+      <div class="row">
+        <div class="tog-grp" id="togRischio">
+          <button class="tog" onclick="togSel(this,'togRischio')">BASSO</button>
+          <button class="tog on" onclick="togSel(this,'togRischio')">NON BASSO</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- S3 COMPARTIMENTI -->
-  <div class="section" id="s3">
-    <div class="sec-head">
-      <div class="sec-badge">🏗</div>
-      <div>
-        <div class="sec-title">Compartimenti</div>
-        <div class="sec-sub">Tutti i compartimenti dell'edificio</div>
-      </div>
-    </div>
-
-    <div class="info-pill">💡 Le sezioni 7 e 10 si sincronizzano automaticamente</div>
+  <div class="sec" id="s3">
+    <div class="sec-hd"><div class="sec-badge">🏗</div><div><div class="sec-title">Compartimenti</div><div class="sec-sub">Sincronizzati con sezioni Carichi e Rvita</div></div></div>
     <div id="compList"></div>
-    <div class="card" style="margin-top:4px;">
-      <button class="btn-add" onclick="addComp()">＋ Aggiungi compartimento</button>
-    </div>
-
-    <div class="card" style="margin-top:14px;">
-      <div class="card-title">Compartimentazione REI</div>
-      <div class="form-row row-h">
-        <label class="field-label">Pareti perimetrali</label>
-        <input type="text" id="reiPareti" value="REI 90" class="val-right" style="text-align:right;max-width:80px">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Soffitti</label>
-        <input type="text" id="reiSoffitti" value="REI 90" class="val-right" style="text-align:right;max-width:80px">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Porte tagliafuoco</label>
-        <input type="text" id="reiPorte" value="REI 120" class="val-right" style="text-align:right;max-width:80px">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Dotazione porte</label>
-        <input type="text" id="dotazionePorte" value="maniglie/maniglioni antipanico nel senso dell'esodo">
-      </div>
+    <div class="card"><button class="btn-add" onclick="addComp()">＋ Aggiungi compartimento</button></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-lbl">Compartimentazione REI</div>
+      <div class="row h"><div class="fl">Pareti perimetrali</div><input type="text" id="reiPareti" class="vr" value="REI 90" style="max-width:80px"></div>
+      <div class="row h"><div class="fl">Soffitti</div><input type="text" id="reiSoffitti" class="vr" value="REI 90" style="max-width:80px"></div>
+      <div class="row h"><div class="fl">Porte tagliafuoco</div><input type="text" id="reiPorte" class="vr" value="REI 120" style="max-width:80px"></div>
+      <div class="row"><div class="fl">Dotazione porte</div><input type="text" id="dotazionePorte" value="maniglie/maniglioni antipanico nel senso dell'esodo"></div>
     </div>
   </div>
 
   <!-- S4 IMPIANTI -->
-  <div class="section" id="s4">
-    <div class="sec-head">
-      <div class="sec-badge">⚙️</div>
-      <div>
-        <div class="sec-title">Impianti Termici</div>
-        <div class="sec-sub">Forni, caldaie e generatori di calore</div>
-      </div>
-    </div>
+  <div class="sec" id="s4">
+    <div class="sec-hd"><div class="sec-badge">⚙️</div><div><div class="sec-title">Impianti Termici</div><div class="sec-sub">Forni, caldaie, generatori di calore</div></div></div>
     <div id="fornoList"></div>
-    <div class="card" style="margin-top:4px;">
-      <button class="btn-add" onclick="addForno()">＋ Aggiungi impianto</button>
-    </div>
-
-    <div class="card" style="margin-top:14px;">
-      <div class="card-title">Movimentazione interna</div>
-      <div class="form-row row-h">
-        <label class="field-label">Carrello elevatore</label>
-        <input type="text" id="carrello" value="carrello elevatore elettrico" class="val-right" style="text-align:right">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Altro mezzo</label>
-        <input type="text" id="altroMezzo" value="transpallet manuale" class="val-right" style="text-align:right">
-      </div>
+    <div class="card"><button class="btn-add" onclick="addForno()">＋ Aggiungi impianto</button></div>
+    <div class="card" style="margin-top:14px">
+      <div class="card-lbl">Movimentazione</div>
+      <div class="row h"><div class="fl">Carrello elevatore</div><input type="text" id="carrello" class="vr" value="carrello elevatore elettrico"></div>
+      <div class="row h"><div class="fl">Altro mezzo</div><input type="text" id="altroMezzo" class="vr" value="transpallet manuale"></div>
     </div>
   </div>
 
   <!-- S5 PERICOLI -->
-  <div class="section" id="s5">
-    <div class="sec-head">
-      <div class="sec-badge">⚠️</div>
-      <div>
-        <div class="sec-title">Pericoli &amp; Inneschi</div>
-        <div class="sec-sub">Individuazione dei pericoli d'incendio</div>
-      </div>
-    </div>
-
+  <div class="sec" id="s5">
+    <div class="sec-hd"><div class="sec-badge">⚠️</div><div><div class="sec-title">Pericoli &amp; Inneschi</div><div class="sec-sub">Individuazione dei pericoli d'incendio</div></div></div>
     <div class="card">
-      <div class="card-title">Pericoli d'incendio</div>
+      <div class="card-lbl">Pericoli d'incendio</div>
       <div id="pericoliList"></div>
-      <button class="btn-add" onclick="addItem('pericoli', pericoliList, 'Nuovo pericolo')">＋ Aggiungi pericolo</button>
+      <button class="btn-add" onclick="addPericolo()">＋ Aggiungi pericolo</button>
     </div>
-
     <div class="card">
-      <div class="card-title">Sorgenti di innesco (una per riga)</div>
-      <div class="form-row">
-        <textarea id="sorgentiInnesco" rows="8">l'arco voltaico dovuto a falsi contatti di apparecchiature non installate secondo le norme di buona tecnica
+      <div class="card-lbl">Sorgenti di innesco (una per riga)</div>
+      <div class="row"><textarea id="sorgentiInnesco" rows="8">l'arco voltaico dovuto a falsi contatti di apparecchiature non installate secondo le norme di buona tecnica
 l'effetto Joule dovuto al corto circuito o al sovraccarico di circuiti
 malfunzionamento degli impianti di condizionamento elettrici se non correttamente manutenuti
 malfunzionamento dei forni se non correttamente manutenuti
@@ -633,269 +242,172 @@ mozziconi di sigarette
 superfici calde
 atti dolosi
 l'uso di fiamme libere e il fumo in aree non autorizzate
-sorgenti legate ai lavori di manutenzione (lavori a caldo) effettuati da ditte esterne</textarea>
-      </div>
+sorgenti legate ai lavori di manutenzione (lavori a caldo) effettuati da ditte esterne</textarea></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Atmosfere esplosive (ATEX)</div>
-      <div class="form-row row-h">
-        <label class="field-label">Zona ATEX</label>
-        <select id="zonaAtex" class="val-right">
+      <div class="card-lbl">Atmosfere esplosive (ATEX)</div>
+      <div class="row h"><div class="fl">Zona ATEX</div>
+        <select id="zonaAtex" class="vr">
           <option value="NP - trascurabile">NP - trascurabile</option>
           <option value="Zona 0">Zona 0</option>
           <option value="Zona 1">Zona 1</option>
           <option value="Zona 2">Zona 2</option>
         </select>
       </div>
-      <div class="form-row">
-        <label class="field-label">Motivazione ATEX</label>
-        <textarea id="motivazioneAtex" rows="3">La farina è gestita esclusivamente in sacchi sigillati e ben conservati, escludendo lo stoccaggio in silos. Le operazioni di prelievo avvengono in quantità limitate e in modo controllato, impedendo la formazione di nubi di polvere in aria.</textarea>
-      </div>
+      <div class="row"><div class="fl">Motivazione ATEX</div><textarea id="motivazioneAtex" rows="3">La farina e gestita esclusivamente in sacchi sigillati, escludendo lo stoccaggio in silos. Le operazioni di prelievo avvengono in quantita limitate e in modo controllato, impedendo la formazione di nubi di polvere in aria.</textarea></div>
     </div>
   </div>
 
   <!-- S6 COMBUSTIBILI -->
-  <div class="section" id="s6">
-    <div class="sec-head">
-      <div class="sec-badge">📦</div>
-      <div>
-        <div class="sec-title">Materiali Combustibili</div>
-        <div class="sec-sub">Materiali combustibili o infiammabili presenti</div>
-      </div>
-    </div>
-
+  <div class="sec" id="s6">
+    <div class="sec-hd"><div class="sec-badge">📦</div><div><div class="sec-title">Materiali Combustibili</div><div class="sec-sub">Materiali combustibili o infiammabili presenti</div></div></div>
     <div class="card">
-      <div class="card-title">Elenco materiali</div>
+      <div class="card-lbl">Elenco materiali</div>
       <div id="combustibiliList"></div>
-      <button class="btn-add" onclick="addItem('combustibili', combustibiliList, 'Nuovo materiale')">＋ Aggiungi materiale</button>
+      <button class="btn-add" onclick="addCombustibile()">＋ Aggiungi materiale</button>
     </div>
-
     <div class="card">
-      <div class="card-title">Sostanze pericolose</div>
-      <div class="form-row row-h">
-        <label class="field-label">Sostanze pericolose classificate?</label>
-        <select id="sostanzePericolose" class="val-right">
-          <option value="no">No</option>
-          <option value="si">Sì</option>
-        </select>
+      <div class="card-lbl">Sostanze pericolose</div>
+      <div class="row h"><div class="fl">Sostanze pericolose classificate?</div>
+        <select id="sostanzePericolose" class="vr"><option value="no">No</option><option value="si">Si</option></select>
       </div>
-      <div class="form-row">
-        <label class="field-label">Note</label>
-        <textarea id="noteSostanze" rows="2">Piccoli quantitativi di prodotti per pulizie in locale dedicato.</textarea>
-      </div>
+      <div class="row"><div class="fl">Note</div><textarea id="noteSostanze" rows="2">Piccoli quantitativi di prodotti per pulizie in locale dedicato.</textarea></div>
     </div>
   </div>
 
   <!-- S7 CARICHI -->
-  <div class="section" id="s7">
-    <div class="sec-head">
-      <div class="sec-badge">📊</div>
-      <div>
-        <div class="sec-title">Carichi d'Incendio</div>
-        <div class="sec-sub">qf e qfd per compartimento</div>
-      </div>
-    </div>
-
+  <div class="sec" id="s7">
+    <div class="sec-hd"><div class="sec-badge">📊</div><div><div class="sec-title">Carichi d'Incendio</div><div class="sec-sub">qf e qfd per compartimento (MJ/mq)</div></div></div>
     <div class="card">
-      <div class="card-title">Sistemi di protezione attiva</div>
-      <div class="form-row">
-        <textarea id="impiantiProtezione" rows="3">Rete di idranti interna
-Impianto IRAI di rivelazione fumo e calore con livello di prestazione III per la strategia S.7</textarea>
-      </div>
+      <div class="card-lbl">Sistemi di protezione attiva</div>
+      <div class="row"><textarea id="impiantiProtezione" rows="3">Rete di idranti interna
+Impianto IRAI di rivelazione fumo e calore con livello di prestazione III per la strategia S.7</textarea></div>
     </div>
-
     <div id="carichiList"></div>
   </div>
 
   <!-- S8 CONTESTO -->
-  <div class="section" id="s8">
-    <div class="sec-head">
-      <div class="sec-badge">🗺</div>
-      <div>
-        <div class="sec-title">Contesto &amp; Layout</div>
-        <div class="sec-sub">Accessibilità, esodo, ventilazione</div>
-      </div>
-    </div>
-
+  <div class="sec" id="s8">
+    <div class="sec-hd"><div class="sec-badge">🗺</div><div><div class="sec-title">Contesto &amp; Layout</div><div class="sec-sub">Accessibilità, esodo, ventilazione</div></div></div>
     <div class="card">
-      <div class="card-title">Accessibilità VVF</div>
-      <div class="form-row row-h">
-        <label class="field-label">Larghezza accesso VVF (m)</label>
-        <input type="number" id="larghAccessoVVF" value="8" class="val-right" style="text-align:right;max-width:60px">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Distanza edificio più vicino (m)</label>
-        <input type="number" id="distanzaEdificio" value="40" class="val-right" style="text-align:right;max-width:60px">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Note accessibilità</label>
-        <textarea id="noteAccessibilita" rows="2">L'edificio risulta isolato e separato dalle costruzioni limitrofe per tutto il suo perimetro. Facilmente avvicinabile dai mezzi di soccorso senza limitazioni di peso e dimensioni.</textarea>
-      </div>
+      <div class="card-lbl">Accessibilità VVF</div>
+      <div class="row h"><div class="fl">Larghezza accesso VVF (m)</div><input type="number" id="larghAccessoVVF" class="vr" value="8" style="max-width:60px"></div>
+      <div class="row h"><div class="fl">Distanza edificio limitrofo (m)</div><input type="number" id="distanzaEdificio" class="vr" value="40" style="max-width:60px"></div>
+      <div class="row"><div class="fl">Note accessibilità</div><textarea id="noteAccessibilita" rows="2">L'edificio risulta isolato e separato dalle costruzioni limitrofe per tutto il suo perimetro. Facilmente avvicinabile dai mezzi di soccorso senza limitazioni di peso e dimensioni.</textarea></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Esodo</div>
-      <div class="form-row">
-        <label class="field-label">Luogo sicuro finale</label>
-        <input type="text" id="luogoSicuro" value="pubblica via di Viale della Tecnica e dell'Innovazione">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Luogo temporaneo</label>
-        <input type="text" id="luogoTemp" value="cortile scoperto interno all'edificio">
-      </div>
+      <div class="card-lbl">Esodo</div>
+      <div class="row"><div class="fl">Luogo sicuro finale</div><input type="text" id="luogoSicuro" value="pubblica via di Viale della Tecnica e dell'Innovazione"></div>
+      <div class="row"><div class="fl">Luogo temporaneo</div><input type="text" id="luogoTemp" value="cortile scoperto interno all'edificio"></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Ventilazione e smaltimento fumi</div>
-      <div class="form-row">
-        <textarea id="ventilazione" rows="4">Ciascun compartimento dispone di superfici di aerazione naturale disposte nella parte alta e ben distribuite lungo il perimetro. Le aperture sono del tipo SEd. Il locale forno dispone anche di apertura SEa di 0,28 m² come richiesto dalla RTV verticale DM 08/11/2019.</textarea>
-      </div>
+      <div class="card-lbl">Ventilazione e smaltimento fumi</div>
+      <div class="row"><textarea id="ventilazione" rows="4">Ciascun compartimento dispone di superfici di aerazione naturale disposte nella parte alta e ben distribuite lungo il perimetro. Le aperture sono del tipo SEd. Il locale forno dispone anche di apertura SEa di 0,28 m2 come richiesto dalla RTV verticale DM 08/11/2019.</textarea></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Impianti antincendio</div>
-      <div class="form-row">
-        <label class="field-label">Norma progetto rete idranti</label>
-        <input type="text" id="normaidranti" value="UNI 10779 e UNI EN 12845">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Livello pericolosità</label>
-        <input type="number" id="livelloPericolosita" value="1" class="val-right" style="text-align:right;max-width:50px">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Tipo bocche idranti</label>
-        <input type="text" id="tipoIdranti" value="UNI45 con attacchi autopompa VVF UNI 70">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Autonomia illumin. emergenza (h)</label>
-        <input type="number" id="autonomiaEmerg" value="1" class="val-right" style="text-align:right;max-width:50px">
-      </div>
+      <div class="card-lbl">Impianti antincendio</div>
+      <div class="row"><div class="fl">Norma progetto rete idranti</div><input type="text" id="normaidranti" value="UNI 10779 e UNI EN 12845"></div>
+      <div class="row h"><div class="fl">Livello pericolosità</div><input type="number" id="livelloPericolosita" class="vr" value="1" style="max-width:50px"></div>
+      <div class="row"><div class="fl">Tipo bocche idranti</div><input type="text" id="tipoIdranti" value="UNI45 con attacchi autopompa VVF UNI 70"></div>
+      <div class="row h"><div class="fl">Autonomia illumin. emergenza (h)</div><input type="number" id="autonomiaEmerg" class="vr" value="1" style="max-width:50px"></div>
     </div>
   </div>
 
   <!-- S9 MISURE -->
-  <div class="section" id="s9">
-    <div class="sec-head">
-      <div class="sec-badge">🛡</div>
-      <div>
-        <div class="sec-title">Misure Preventive</div>
-        <div class="sec-sub">Misure tecniche e gestionali</div>
-      </div>
-    </div>
-
+  <div class="sec" id="s9">
+    <div class="sec-hd"><div class="sec-badge">🛡</div><div><div class="sec-title">Misure Preventive</div><div class="sec-sub">Misure tecniche e gestionali</div></div></div>
     <div class="card">
-      <div class="card-title">Esercitazioni</div>
-      <div class="form-row row-h">
-        <label class="field-label">N° esercitazioni annue</label>
-        <input type="number" id="numEsercitazioni" value="2" class="val-right" style="text-align:right;max-width:50px">
-      </div>
+      <div class="card-lbl">Esercitazioni</div>
+      <div class="row h"><div class="fl">N° esercitazioni annue</div><input type="number" id="numEsercitazioni" class="vr" value="2" style="max-width:50px"></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Estintori</div>
-      <div class="form-row">
-        <label class="field-label">Tipo 1</label>
-        <input type="text" id="estintore1" value="Estintori portatili idonei per apparecchiature elettriche fino a 1000V">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Tipo 2</label>
-        <input type="text" id="estintore2" value="Estintori a CO2">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Distanza max da qualsiasi punto (m)</label>
-        <input type="number" id="distanzaEstintori" value="30" class="val-right" style="text-align:right;max-width:50px">
-      </div>
+      <div class="card-lbl">Estintori</div>
+      <div class="row"><div class="fl">Tipo 1</div><input type="text" id="estintore1" value="Estintori portatili idonei per apparecchiature elettriche fino a 1000V"></div>
+      <div class="row"><div class="fl">Tipo 2</div><input type="text" id="estintore2" value="Estintori a CO2"></div>
+      <div class="row h"><div class="fl">Distanza max da qualsiasi punto (m)</div><input type="number" id="distanzaEstintori" class="vr" value="30" style="max-width:50px"></div>
     </div>
-
     <div class="card">
-      <div class="card-title">Prescrizioni speciali / ATEX</div>
-      <div class="form-row">
-        <textarea id="misureAggiuntive" rows="3">Per garantire che il rischio ATEX rimanga trascurabile, è prescritta una pulizia sistematica delle superfici e delle attrezzature per prevenire qualsiasi accumulo di polvere di farina combustibile.</textarea>
-      </div>
+      <div class="card-lbl">Prescrizioni speciali</div>
+      <div class="row"><textarea id="misureAggiuntive" rows="3">Per garantire che il rischio ATEX rimanga trascurabile, e prescritta una pulizia sistematica delle superfici e delle attrezzature per prevenire qualsiasi accumulo di polvere di farina combustibile.</textarea></div>
     </div>
   </div>
 
   <!-- S10 RVITA -->
-  <div class="section" id="s10">
-    <div class="sec-head">
-      <div class="sec-badge">📈</div>
-      <div>
-        <div class="sec-title">Profilo Rvita</div>
-        <div class="sec-sub">Tabelle G.3 del Codice</div>
-      </div>
-    </div>
-
+  <div class="sec" id="s10">
+    <div class="sec-hd"><div class="sec-badge">📈</div><div><div class="sec-title">Profilo Rvita</div><div class="sec-sub">Tabelle G.3 del Codice</div></div></div>
     <div class="card">
-      <div class="card-title">δocc — caratteristiche occupanti</div>
-      <div class="form-row row-h">
-        <label class="field-label">δocc</label>
-        <select id="deltaOcc" class="val-right">
+      <div class="card-lbl">delta-occ — caratteristiche occupanti</div>
+      <div class="row h"><div class="fl">delta-occ</div>
+        <select id="deltaOcc" class="vr">
           <option value="A" selected>A — Veglia, familiari</option>
           <option value="B">B — Veglia, non familiari</option>
           <option value="C">C — Sonno</option>
-          <option value="D">D — Difficoltà evacuazione</option>
+          <option value="D">D — Difficolta evacuazione</option>
         </select>
       </div>
     </div>
-
     <div id="rvitaList"></div>
   </div>
 
-  <!-- NAV ARROWS -->
-  <div class="nav-arrows" id="navArrows">
-    <button class="nav-arrow disabled" id="btnPrev" onclick="navigate(-1)">← Precedente</button>
-    <span class="step-indicator" id="stepInd">1 / 10</span>
-    <button class="nav-arrow" id="btnNext" onclick="navigate(1)">Successiva →</button>
+  <!-- NAV -->
+  <div class="nav-row">
+    <button class="nav-btn" id="btnPrev" onclick="navTo(curIdx-1)">← Indietro</button>
+    <span class="nav-ind" id="navInd">1 / 10</span>
+    <button class="nav-btn" id="btnNext" onclick="navTo(curIdx+1)">Avanti →</button>
   </div>
-  <div style="height:8px;"></div>
 
-</div><!-- end scroll-area -->
+</div><!-- end scroll -->
 
-<!-- TAB BAR -->
-<div class="tab-bar" id="tabBar"></div>
+<div class="tabs" id="tabBar"></div>
 
-<div id="toast">✅ Documento generato!</div>
-
+<!-- OVERLAY -->
+<div class="overlay" id="dlOverlay" style="display:none" onclick="if(event.target===this)this.style.display='none'">
+  <div class="overlay-box">
+    <div class="overlay-handle"></div>
+    <div class="overlay-title">📄 Documento pronto</div>
+    <div class="overlay-sub" id="dlName"></div>
+    <a class="overlay-link" id="dlLink" href="#">⬇ Scarica .docx</a>
+    <div class="overlay-hint">Su iPhone: tieni premuto il link e scegli<br><strong>"Scarica file collegato"</strong></div>
+    <button class="overlay-close" onclick="document.getElementById('dlOverlay').style.display='none'">Chiudi</button>
+  </div>
+</div>
 
 <script>
-// ============================================================
+// =====================================================
 // DATA
-// ============================================================
-let compartimenti = [
-  { nome:"Magazzino N.1 (deposito materie prime/prodotti finiti)", piano:"Piano terra", sup:239, occ:10, rvita:"A2", deltaAlpha:"2", qf:1022.80, qfd:782.44 },
-  { nome:"Magazzino N.2 (deposito materie prime/prodotti finiti)", piano:"Piano terra", sup:64,  occ:10, rvita:"A2", deltaAlpha:"2", qf:1019.84, qfd:780.18 },
-  { nome:"Magazzino N.3 (deposito materie prime/prodotti finiti)", piano:"Piano terra", sup:107, occ:10, rvita:"A2", deltaAlpha:"2", qf:1176.87, qfd:900.30 },
-  { nome:"Locale Forni (attività soggetta 74.1.A)",                piano:"Piano primo",  sup:0,   occ:10, rvita:"A2", deltaAlpha:"2", qf:252.00,  qfd:192.78 },
-  { nome:"Laboratorio e deposito pedane in legno",                 piano:"Piano secondo",sup:167, occ:10, rvita:"A1", deltaAlpha:"1", qf:186.56,  qfd:142.72 },
-  { nome:"Uffici",                                                 piano:"Piano secondo",sup:161, occ:10, rvita:"A1", deltaAlpha:"1", qf:189.14,  qfd:144.69 },
+// =====================================================
+var piani = [
+  {nome:"Seminterrato", sup:0, desc:"Locale antincendio con gruppo di pompaggio"},
+  {nome:"Piano terra", sup:410, desc:"Reception e 3 compartimenti deposito (attivita soggetta 70.1.B)"},
+  {nome:"Piano primo", sup:0, desc:"Locale forni - attivita soggetta 74.1.A"},
+  {nome:"Piano secondo", sup:328, desc:"Laboratorio, deposito e uffici"},
+  {nome:"Piano terzo", sup:0, desc:"Attualmente allo stato grezzo - futuro alloggio custode"}
 ];
 
-let forni = [
-  { desc:"Forno (n.3)", comb:"gas", kw:93 },
-  { desc:"Bollitore taralli", comb:"gas", kw:28 },
-  { desc:"Aerotermo a gas", comb:"gas", kw:32 },
-  { desc:"Prese tappate (n.2)", comb:"gas", kw:5 },
+var normative = [
+  {desc:"Codice prevenzione incendi", ref:"DM 03/08/2015"},
+  {desc:"Regola tecnica verticale centrale termica", ref:"DM 08/11/2019"},
+  {desc:"Gestione sicurezza antincendio", ref:"DM 02/09/2021"},
+  {desc:"Sicurezza nei luoghi di lavoro", ref:"D.Lgs. 81/2008"}
 ];
 
-let piani = [
-  { nome:"Seminterrato", sup:0, desc:"Locale antincendio con gruppo di pompaggio" },
-  { nome:"Piano terra", sup:410, desc:"Reception e 3 compartimenti deposito (attività soggetta 70.1.B)" },
-  { nome:"Piano primo", sup:0, desc:"Locale forni — attività soggetta 74.1.A" },
-  { nome:"Piano secondo", sup:328, desc:"Laboratorio, deposito e uffici" },
-  { nome:"Piano terzo", sup:0, desc:"Attualmente allo stato grezzo — futuro alloggio custode" },
+var compartimenti = [
+  {nome:"Magazzino N.1", piano:"Piano terra", sup:239, occ:10, rvita:"A2", da:"2", qf:1022.80, qfd:782.44},
+  {nome:"Magazzino N.2", piano:"Piano terra", sup:64,  occ:10, rvita:"A2", da:"2", qf:1019.84, qfd:780.18},
+  {nome:"Magazzino N.3", piano:"Piano terra", sup:107, occ:10, rvita:"A2", da:"2", qf:1176.87, qfd:900.30},
+  {nome:"Locale Forni",  piano:"Piano primo",  sup:0,   occ:10, rvita:"A2", da:"2", qf:252.00,  qfd:192.78},
+  {nome:"Laboratorio e deposito", piano:"Piano secondo", sup:167, occ:10, rvita:"A1", da:"1", qf:186.56, qfd:142.72},
+  {nome:"Uffici", piano:"Piano secondo", sup:161, occ:10, rvita:"A1", da:"1", qf:189.14, qfd:144.69}
 ];
 
-let normative = [
-  { desc:"Codice prevenzione incendi", ref:"DM 03/08/2015" },
-  { desc:"Regola tecnica verticale centrale termica", ref:"DM 08/11/2019" },
-  { desc:"Gestione sicurezza antincendio (mini codice)", ref:"DM 02/09/2021" },
-  { desc:"Sicurezza nei luoghi di lavoro", ref:"D.Lgs. 81/2008" },
+var forni = [
+  {desc:"Forno (n.3)", comb:"gas", kw:93},
+  {desc:"Bollitore taralli", comb:"gas", kw:28},
+  {desc:"Aerotermo a gas", comb:"gas", kw:32},
+  {desc:"Prese tappate (n.2)", comb:"gas", kw:5}
 ];
 
-let attSecVisible = true;
-
-
+var pericoli = [
   "Malfunzionamento di impianti elettrici",
   "Malfunzionamento di impianto di ricarica elettrica del carrello elevatore",
   "Malfunzionamento di impianti di cottura e bollitura",
@@ -904,734 +416,672 @@ let attSecVisible = true;
   "Malfunzionamento di impianti di condizionamento a gas",
   "Malfunzionamento di impianti dell'ascensore oleodinamico",
   "Accumulo di rifiuti, imballaggi o materiali combustibili al di fuori dei locali deputati",
-  "Presenza di polveri combustibili (farina), con potenziale rischio di incendio ed esplosione",
+  "Presenza di polveri combustibili (farina), con potenziale rischio di incendio ed esplosione"
 ];
 
-let combustibili = [
+var combustibili = [
   "Cartoni di imballaggio per prodotti finiti e materie prime",
-  "Pallet di legno",
-  "Plastica degli imballaggi",
-  "Bottiglie di olio",
-  "Batterie al piombo dell'elevatore elettrico",
-  "Batterie dell'aspirapolvere industriale",
-  "Gomma degli pneumatici del carrello elevatore",
-  "Arredi per uffici",
-  "Sacchi di farina",
-  "Confezioni di zucchero",
+  "Pallet di legno","Plastica degli imballaggi","Bottiglie di olio",
+  "Batterie al piombo dell'elevatore elettrico","Batterie dell'aspirapolvere industriale",
+  "Gomma degli pneumatici del carrello elevatore","Arredi per uffici",
+  "Sacchi di farina","Confezioni di zucchero"
 ];
 
-// ============================================================
-// TABS
-// ============================================================
-const TABS = [
-  { id:"s1",  icon:"🏭", label:"Anagrafica" },
-  { id:"s2",  icon:"📋", label:"Attività" },
-  { id:"s3",  icon:"🏗",  label:"Compartim." },
-  { id:"s4",  icon:"⚙️", label:"Impianti" },
-  { id:"s5",  icon:"⚠️", label:"Pericoli" },
-  { id:"s6",  icon:"📦", label:"Combustib." },
-  { id:"s7",  icon:"📊", label:"Carichi" },
-  { id:"s8",  icon:"🗺",  label:"Contesto" },
-  { id:"s9",  icon:"🛡",  label:"Misure" },
-  { id:"s10", icon:"📈", label:"Rvita" },
-];
+var attSecVisible = true;
 
-let currentIdx = 0;
+// =====================================================
+// TABS / NAV
+// =====================================================
+var TABS = [
+  {id:"s1",ico:"🏭",lbl:"Anagrafica"},
+  {id:"s2",ico:"📋",lbl:"Attività"},
+  {id:"s3",ico:"🏗",lbl:"Compartim."},
+  {id:"s4",ico:"⚙️",lbl:"Impianti"},
+  {id:"s5",ico:"⚠️",lbl:"Pericoli"},
+  {id:"s6",ico:"📦",lbl:"Combustib."},
+  {id:"s7",ico:"📊",lbl:"Carichi"},
+  {id:"s8",ico:"🗺",lbl:"Contesto"},
+  {id:"s9",ico:"🛡",lbl:"Misure"},
+  {id:"s10",ico:"📈",lbl:"Rvita"}
+];
+var curIdx = 0;
 
 function buildTabs() {
-  const bar = document.getElementById('tabBar');
-  bar.innerHTML = TABS.map((t,i) => `
-    <div class="tab-item ${i===0?'active':''}" id="tab_${t.id}" onclick="goTo(${i})">
-      <div class="tab-icon">${t.icon}</div>
-      <div class="tab-active-dot"></div>
-      <div class="tab-label">${t.label}</div>
-    </div>`).join('');
+  var bar = document.getElementById('tabBar');
+  bar.innerHTML = TABS.map(function(t,i){
+    return '<button class="tab'+(i===0?' active':'')+'" id="tab_'+t.id+'" onclick="navTo('+i+')">'
+      +'<span class="tab-ico">'+t.ico+'</span>'
+      +'<span class="tab-dot"></span>'
+      +'<span class="tab-lbl">'+t.lbl+'</span>'
+      +'</button>';
+  }).join('');
 }
 
-function goTo(idx) {
-  // hide current
-  document.getElementById(TABS[currentIdx].id).classList.remove('active');
-  document.getElementById('tab_'+TABS[currentIdx].id).classList.remove('active');
-  currentIdx = idx;
-  // show new
-  document.getElementById(TABS[currentIdx].id).classList.add('active');
-  document.getElementById('tab_'+TABS[currentIdx].id).classList.add('active');
+function navTo(idx) {
+  if(idx < 0 || idx >= TABS.length) return;
+  document.getElementById(TABS[curIdx].id).classList.remove('active');
+  document.getElementById('tab_'+TABS[curIdx].id).classList.remove('active');
+  curIdx = idx;
+  document.getElementById(TABS[curIdx].id).classList.add('active');
+  document.getElementById('tab_'+TABS[curIdx].id).classList.add('active');
   // scroll tab into view
-  const tabEl = document.getElementById('tab_'+TABS[currentIdx].id);
-  tabEl.scrollIntoView({ behavior:'smooth', block:'nearest', inline:'center' });
-  // scroll top
-  document.getElementById('scrollArea').scrollTo({top:0, behavior:'smooth'});
-  // update arrows
-  updateArrows();
+  document.getElementById('tab_'+TABS[curIdx].id).scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  document.getElementById('scrollArea').scrollTop = 0;
   // refresh dynamic sections
-  if (idx === 6) renderCarichi();
-  if (idx === 9) renderRvita();
+  if(idx===6) renderCarichi();
+  if(idx===9) renderRvita();
+  // update arrows
+  document.getElementById('btnPrev').disabled = (curIdx===0);
+  document.getElementById('btnNext').disabled = (curIdx===TABS.length-1);
+  document.getElementById('navInd').textContent = (curIdx+1)+' / '+TABS.length;
 }
 
-function navigate(dir) {
-  const next = currentIdx + dir;
-  if (next >= 0 && next < TABS.length) goTo(next);
-}
-
-function updateArrows() {
-  const prev = document.getElementById('btnPrev');
-  const next = document.getElementById('btnNext');
-  const ind  = document.getElementById('stepInd');
-  prev.className = 'nav-arrow' + (currentIdx===0?' disabled':'');
-  next.className = 'nav-arrow' + (currentIdx===TABS.length-1?' disabled':'');
-  ind.textContent = `${currentIdx+1} / ${TABS.length}`;
-}
-
-function tog(el, groupId) {
-  document.querySelectorAll('#'+groupId+' .tog').forEach(b => b.classList.remove('on'));
+function togSel(el, grpId) {
+  document.querySelectorAll('#'+grpId+' .tog').forEach(function(b){b.classList.remove('on');});
   el.classList.add('on');
 }
 
-// ============================================================
+// =====================================================
 // PIANI
-// ============================================================
+// =====================================================
 function renderPiani() {
-  const c = document.getElementById('pianiList');
-  c.innerHTML = piani.map((p, i) => `
-    <div class="item-card" style="margin-bottom:10px;">
-      <div class="item-card-header">
-        <span>Piano ${i+1}</span>
-        <button class="btn-del-sm" onclick="removePiano(${i})">Rimuovi</button>
-      </div>
-      <div class="form-row">
-        <label class="field-label">Nome piano</label>
-        <input type="text" value="${p.nome}" onchange="piani[${i}].nome=this.value">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Superficie (m²)</label>
-        <input type="number" value="${p.sup}" class="val-right" style="text-align:right;max-width:80px" onchange="piani[${i}].sup=parseFloat(this.value)||0">
-      </div>
-      <div class="form-row">
-        <label class="field-label">Descrizione</label>
-        <input type="text" value="${p.desc}" onchange="piani[${i}].desc=this.value">
-      </div>
-    </div>`).join('');
+  var c = document.getElementById('pianiList');
+  c.innerHTML = piani.map(function(p,i){
+    return '<div class="ic">'
+      +'<div class="ic-hd"><span>Piano '+(i+1)+'</span><button class="btn-rm" onclick="removePiano('+i+')">Rimuovi</button></div>'
+      +'<div class="row"><div class="fl">Nome piano</div><input type="text" value="'+esc(p.nome)+'" oninput="piani['+i+'].nome=this.value"></div>'
+      +'<div class="row h"><div class="fl">Superficie (m²)</div><input type="number" class="vr" value="'+p.sup+'" style="max-width:80px" oninput="piani['+i+'].sup=parseFloat(this.value)||0"></div>'
+      +'<div class="row"><div class="fl">Descrizione</div><input type="text" value="'+esc(p.desc)+'" oninput="piani['+i+'].desc=this.value"></div>'
+      +'</div>';
+  }).join('');
 }
+function addPiano() { piani.push({nome:"Nuovo piano",sup:0,desc:""}); renderPiani(); }
+function removePiano(i) { piani.splice(i,1); renderPiani(); }
 
-function addPiano() {
-  piani.push({ nome:"Nuovo piano", sup:0, desc:"" });
-  renderPiani();
-}
-
-function removePiano(i) {
-  piani.splice(i,1);
-  renderPiani();
-}
-
-// ============================================================
+// =====================================================
 // NORMATIVA
-// ============================================================
+// =====================================================
 function renderNormativa() {
-  const c = document.getElementById('normativaList');
-  c.innerHTML = normative.map((n, i) => `
-    <div class="repeater-item" style="flex-direction:column;align-items:stretch;gap:6px;">
-      <div style="display:flex;align-items:center;gap:8px;">
-        <input type="text" value="${n.desc}" placeholder="Descrizione norma" style="flex:1;font-size:14px;" onchange="normative[${i}].desc=this.value">
-        <button class="btn-del" onclick="removeNormativa(${i})">✕</button>
-      </div>
-      <input type="text" value="${n.ref}" placeholder="Riferimento (es. DM 03/08/2015)" style="font-size:13px;color:var(--muted);" onchange="normative[${i}].ref=this.value">
-    </div>`).join('');
+  var c = document.getElementById('normativaList');
+  c.innerHTML = normative.map(function(n,i){
+    return '<div style="padding:10px 16px;border-bottom:1px solid var(--border)">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">'
+      +'<input type="text" value="'+esc(n.desc)+'" placeholder="Descrizione" style="flex:1;font-size:14px" oninput="normative['+i+'].desc=this.value">'
+      +'<button class="btn-x" onclick="removeNormativa('+i+')">✕</button></div>'
+      +'<input type="text" value="'+esc(n.ref)+'" placeholder="Riferimento (es. DM 03/08/2015)" style="font-size:13px;color:var(--muted);width:100%" oninput="normative['+i+'].ref=this.value">'
+      +'</div>';
+  }).join('');
 }
+function addNormativa() { normative.push({desc:"Nuova norma",ref:""}); renderNormativa(); }
+function removeNormativa(i) { normative.splice(i,1); renderNormativa(); }
 
-function addNormativa() {
-  normative.push({ desc:"Nuova norma", ref:"" });
-  renderNormativa();
-}
-
-function removeNormativa(i) {
-  normative.splice(i,1);
-  renderNormativa();
-}
-
-// ============================================================
-// ATTIVITÀ SECONDARIA toggle
-// ============================================================
+// =====================================================
+// ATT SECONDARIA
+// =====================================================
 function toggleAttSec(show) {
   attSecVisible = show;
-  document.getElementById('attSecCard').style.display = show ? 'block' : 'none';
-  document.getElementById('attSecAdd').style.display = show ? 'none' : 'block';
+  document.getElementById('attSecCard').style.display = show?'block':'none';
+  document.getElementById('attSecAdd').style.display = show?'none':'block';
 }
 
-// ============================================================
-// PERICOLI
-// ============================================================
+// =====================================================
+// COMPARTIMENTI
+// =====================================================
 function renderCompartimenti() {
-  const c = document.getElementById('compList');
-  c.innerHTML = compartimenti.map((comp,i) => `
-    <div class="item-card">
-      <div class="item-card-header">
-        <span>Compartimento ${i+1}</span>
-        <button class="btn-del-sm" onclick="removeComp(${i})">Rimuovi</button>
-      </div>
-      <div class="form-row">
-        <label class="field-label">Nome / Destinazione</label>
-        <input type="text" value="${comp.nome}" onchange="compartimenti[${i}].nome=this.value">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Piano</label>
-        <input type="text" value="${comp.piano}" class="val-right" style="text-align:right" onchange="compartimenti[${i}].piano=this.value">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Superficie (m²)</label>
-        <input type="number" value="${comp.sup}" class="val-right" style="text-align:right;max-width:70px" onchange="compartimenti[${i}].sup=parseFloat(this.value)||0">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Max occupanti</label>
-        <input type="number" value="${comp.occ}" class="val-right" style="text-align:right;max-width:70px" onchange="compartimenti[${i}].occ=parseInt(this.value)||0">
-      </div>
-    </div>`).join('');
+  var c = document.getElementById('compList');
+  c.innerHTML = compartimenti.map(function(comp,i){
+    return '<div class="ic">'
+      +'<div class="ic-hd"><span>Compartimento '+(i+1)+'</span><button class="btn-rm" onclick="removeComp('+i+')">Rimuovi</button></div>'
+      +'<div class="row"><div class="fl">Nome / Destinazione</div><input type="text" value="'+esc(comp.nome)+'" oninput="compartimenti['+i+'].nome=this.value"></div>'
+      +'<div class="row h"><div class="fl">Piano</div><input type="text" class="vr" value="'+esc(comp.piano)+'" oninput="compartimenti['+i+'].piano=this.value"></div>'
+      +'<div class="row h"><div class="fl">Superficie (m²)</div><input type="number" class="vr" value="'+comp.sup+'" style="max-width:70px" oninput="compartimenti['+i+'].sup=parseFloat(this.value)||0"></div>'
+      +'<div class="row h"><div class="fl">Max occupanti</div><input type="number" class="vr" value="'+comp.occ+'" style="max-width:60px" oninput="compartimenti['+i+'].occ=parseInt(this.value)||0"></div>'
+      +'</div>';
+  }).join('');
 }
+function addComp() { compartimenti.push({nome:"Nuovo compartimento",piano:"Piano terra",sup:0,occ:0,rvita:"A1",da:"1",qf:0,qfd:0}); renderCompartimenti(); }
+function removeComp(i) { compartimenti.splice(i,1); renderCompartimenti(); }
 
-function addComp() {
-  compartimenti.push({ nome:"Nuovo compartimento", piano:"Piano terra", sup:0, occ:0, rvita:"A1", deltaAlpha:"1", qf:0, qfd:0 });
-  renderCompartimenti();
-}
-
-function removeComp(i) {
-  compartimenti.splice(i,1);
-  renderCompartimenti();
-}
-
-// ============================================================
+// =====================================================
 // FORNI
-// ============================================================
+// =====================================================
 function renderForni() {
-  const c = document.getElementById('fornoList');
-  c.innerHTML = forni.map((f,i) => `
-    <div class="item-card">
-      <div class="item-card-header">
-        <span>Impianto ${i+1}</span>
-        <button class="btn-del-sm" onclick="removeForno(${i})">Rimuovi</button>
-      </div>
-      <div class="form-row">
-        <label class="field-label">Descrizione</label>
-        <input type="text" value="${f.desc}" onchange="forni[${i}].desc=this.value">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Combustibile</label>
-        <select class="val-right" onchange="forni[${i}].comb=this.value">
-          <option value="gas" ${f.comb==='gas'?'selected':''}>Gas</option>
-          <option value="gasolio" ${f.comb==='gasolio'?'selected':''}>Gasolio</option>
-          <option value="elettrico" ${f.comb==='elettrico'?'selected':''}>Elettrico</option>
-        </select>
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Potenza (kW)</label>
-        <input type="number" value="${f.kw}" class="val-right" style="text-align:right;max-width:70px" onchange="forni[${i}].kw=parseFloat(this.value)||0">
-      </div>
-    </div>`).join('');
+  var c = document.getElementById('fornoList');
+  c.innerHTML = forni.map(function(f,i){
+    return '<div class="ic">'
+      +'<div class="ic-hd"><span>Impianto '+(i+1)+'</span><button class="btn-rm" onclick="removeForno('+i+')">Rimuovi</button></div>'
+      +'<div class="row"><div class="fl">Descrizione</div><input type="text" value="'+esc(f.desc)+'" oninput="forni['+i+'].desc=this.value"></div>'
+      +'<div class="row h"><div class="fl">Combustibile</div>'
+      +'<select class="vr" oninput="forni['+i+'].comb=this.value">'
+      +'<option value="gas"'+(f.comb==='gas'?' selected':'')+'>Gas</option>'
+      +'<option value="gasolio"'+(f.comb==='gasolio'?' selected':'')+'>Gasolio</option>'
+      +'<option value="elettrico"'+(f.comb==='elettrico'?' selected':'')+'>Elettrico</option>'
+      +'</select></div>'
+      +'<div class="row h"><div class="fl">Potenza (kW)</div><input type="number" class="vr" value="'+f.kw+'" style="max-width:70px" oninput="forni['+i+'].kw=parseFloat(this.value)||0"></div>'
+      +'</div>';
+  }).join('');
 }
+function addForno() { forni.push({desc:"Nuovo impianto",comb:"gas",kw:0}); renderForni(); }
+function removeForno(i) { forni.splice(i,1); renderForni(); }
 
-function addForno() {
-  forni.push({ desc:"Nuovo impianto", comb:"gas", kw:0 });
-  renderForni();
+// =====================================================
+// PERICOLI / COMBUSTIBILI
+// =====================================================
+function renderPericoli() {
+  var c = document.getElementById('pericoliList');
+  c.innerHTML = pericoli.map(function(p,i){
+    return '<div class="ri"><input type="text" value="'+esc(p)+'" oninput="pericoli['+i+']=this.value"><button class="btn-x" onclick="pericoli.splice('+i+',1);renderPericoli()">✕</button></div>';
+  }).join('');
 }
+function addPericolo() { pericoli.push("Nuovo pericolo"); renderPericoli(); }
 
-function removeForno(i) {
-  forni.splice(i,1);
-  renderForni();
+function renderCombustibili() {
+  var c = document.getElementById('combustibiliList');
+  c.innerHTML = combustibili.map(function(p,i){
+    return '<div class="ri"><input type="text" value="'+esc(p)+'" oninput="combustibili['+i+']=this.value"><button class="btn-x" onclick="combustibili.splice('+i+',1);renderCombustibili()">✕</button></div>';
+  }).join('');
 }
+function addCombustibile() { combustibili.push("Nuovo materiale"); renderCombustibili(); }
 
-// ============================================================
-// GENERIC LIST ITEMS (pericoli / combustibili)
-// ============================================================
-function renderList(arr, containerId) {
-  const c = document.getElementById(containerId);
-  c.innerHTML = arr.map((item,i) => `
-    <div class="repeater-item">
-      <input type="text" value="${item}" onchange="${containerId==='pericoliList'?'pericoli':'combustibili'}[${i}]=this.value">
-      <button class="btn-del" onclick="removeItem('${containerId==='pericoliList'?'pericoli':'combustibili'}','${containerId}',${i})">✕</button>
-    </div>`).join('');
-}
-
-function addItem(arrName, el, placeholder) {
-  if (arrName==='pericoli') { pericoli.push(placeholder); renderList(pericoli,'pericoliList'); }
-  else { combustibili.push(placeholder); renderList(combustibili,'combustibiliList'); }
-}
-
-function removeItem(arrName, containerId, i) {
-  if (arrName==='pericoli') { pericoli.splice(i,1); renderList(pericoli,'pericoliList'); }
-  else { combustibili.splice(i,1); renderList(combustibili,'combustibiliList'); }
-}
-
-// ============================================================
+// =====================================================
 // CARICHI
-// ============================================================
+// =====================================================
 function renderCarichi() {
-  const c = document.getElementById('carichiList');
-  c.innerHTML = compartimenti.map((comp,i) => `
-    <div class="card" style="margin-bottom:10px;">
-      <div class="card-title">${comp.nome}</div>
-      <div style="padding:4px 16px 2px;font-size:11px;color:var(--muted);">${comp.piano}</div>
-      <div class="form-row row-h">
-        <label class="field-label">qf (MJ/mq)</label>
-        <input type="number" step="0.01" value="${comp.qf}" class="val-right" style="text-align:right;max-width:90px" onchange="compartimenti[${i}].qf=parseFloat(this.value)||0">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">qfd (MJ/mq)</label>
-        <input type="number" step="0.01" value="${comp.qfd}" class="val-right" style="text-align:right;max-width:90px" onchange="compartimenti[${i}].qfd=parseFloat(this.value)||0">
-      </div>
-    </div>`).join('');
+  var c = document.getElementById('carichiList');
+  c.innerHTML = compartimenti.map(function(comp,i){
+    return '<div class="ic" style="margin-bottom:10px">'
+      +'<div class="ic-hd"><span>'+esc(comp.nome)+' — '+esc(comp.piano)+'</span></div>'
+      +'<div class="row h"><div class="fl">qf (MJ/mq)</div><input type="number" step="0.01" class="vr" value="'+comp.qf+'" style="max-width:90px" oninput="compartimenti['+i+'].qf=parseFloat(this.value)||0"></div>'
+      +'<div class="row h"><div class="fl">qfd (MJ/mq)</div><input type="number" step="0.01" class="vr" value="'+comp.qfd+'" style="max-width:90px" oninput="compartimenti['+i+'].qfd=parseFloat(this.value)||0"></div>'
+      +'</div>';
+  }).join('');
 }
 
-// ============================================================
+// =====================================================
 // RVITA
-// ============================================================
+// =====================================================
 function renderRvita() {
-  const c = document.getElementById('rvitaList');
-  const opts = ['A1','A2','A3','B1','B2','B3','C1','C2','C3','D1','D2','D3'];
-  c.innerHTML = compartimenti.map((comp,i) => `
-    <div class="card" style="margin-bottom:10px;">
-      <div class="card-title">${comp.nome}</div>
-      <div style="padding:4px 16px 2px;font-size:11px;color:var(--muted);">${comp.piano}</div>
-      <div class="form-row row-h">
-        <label class="field-label">δα (velocità crescita)</label>
-        <select class="val-right" onchange="compartimenti[${i}].deltaAlpha=this.value">
-          <option value="1" ${comp.deltaAlpha==='1'?'selected':''}>1 — Lenta</option>
-          <option value="2" ${comp.deltaAlpha==='2'||!comp.deltaAlpha?'selected':''}>2 — Moderata</option>
-          <option value="3" ${comp.deltaAlpha==='3'?'selected':''}>3 — Rapida</option>
-          <option value="4" ${comp.deltaAlpha==='4'?'selected':''}>4 — Ultra-rapida</option>
-        </select>
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">Rvita assegnato</label>
-        <select class="val-right" onchange="compartimenti[${i}].rvita=this.value">
-          ${opts.map(o=>`<option value="${o}" ${comp.rvita===o?'selected':''}>${o}</option>`).join('')}
-        </select>
-      </div>
-    </div>`).join('');
+  var opts = ['A1','A2','A3','B1','B2','B3','C1','C2','C3','D1','D2','D3'];
+  var c = document.getElementById('rvitaList');
+  c.innerHTML = compartimenti.map(function(comp,i){
+    return '<div class="ic" style="margin-bottom:10px">'
+      +'<div class="ic-hd"><span>'+esc(comp.nome)+' — '+esc(comp.piano)+'</span></div>'
+      +'<div class="row h"><div class="fl">delta-alpha (velocita crescita)</div>'
+      +'<select class="vr" oninput="compartimenti['+i+'].da=this.value">'
+      +'<option value="1"'+(comp.da==='1'?' selected':'')+'>1 - Lenta</option>'
+      +'<option value="2"'+(comp.da==='2'||!comp.da?' selected':'')+'>2 - Moderata</option>'
+      +'<option value="3"'+(comp.da==='3'?' selected':'')+'>3 - Rapida</option>'
+      +'<option value="4"'+(comp.da==='4'?' selected':'')+'>4 - Ultra-rapida</option>'
+      +'</select></div>'
+      +'<div class="row h"><div class="fl">Rvita assegnato</div>'
+      +'<select class="vr" oninput="compartimenti['+i+'].rvita=this.value">'
+      +opts.map(function(o){return '<option value="'+o+'"'+(comp.rvita===o?' selected':'')+'>'+o+'</option>';}).join('')
+      +'</select></div>'
+      +'</div>';
+  }).join('');
 }
 
-// ============================================================
+// =====================================================
+// HELPERS
+// =====================================================
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function val(id) { var e=document.getElementById(id); return e?e.value:''; }
+
+// =====================================================
 // INIT
-// ============================================================
-document.addEventListener('DOMContentLoaded', () => {
+// =====================================================
+document.addEventListener('DOMContentLoaded', function() {
   buildTabs();
-  updateArrows();
+  navTo(0);
   renderPiani();
   renderNormativa();
   renderCompartimenti();
   renderForni();
-  renderList(pericoli, 'pericoliList');
-  renderList(combustibili, 'combustibiliList');
+  renderPericoli();
+  renderCombustibili();
 });
 
-// ============================================================
-// HELPER
-// ============================================================
-function val(id) { const e=document.getElementById(id); return e?e.value:''; }
+// =====================================================
+// ZIP / DOCX ENGINE (zero dipendenze)
+// =====================================================
+var CRC32 = (function(){
+  var t = new Uint32Array(256);
+  for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[i]=c;}
+  return function(buf,crc){
+    crc = crc===undefined ? 0xFFFFFFFF : crc;
+    for(var i=0;i<buf.length;i++) crc=t[(crc^buf[i])&0xFF]^(crc>>>8);
+    return (crc^0xFFFFFFFF)>>>0;
+  };
+})();
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'), 3000);
-}
-
-function showDownloadOverlay(dataUri, filename) {
-  const old = document.getElementById('dlOverlay');
-  if (old) old.remove();
-  const overlay = document.createElement('div');
-  overlay.id = 'dlOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center;z-index:9999;padding:0 0 env(safe-area-inset-bottom,0) 0;';
-  overlay.innerHTML = `
-    <div style="background:#fff;border-radius:20px 20px 0 0;padding:28px 24px 36px;width:100%;max-width:480px;font-family:'Inter',-apple-system,sans-serif;">
-      <div style="width:36px;height:4px;background:#e5e5ea;border-radius:2px;margin:0 auto 20px;"></div>
-      <div style="font-size:20px;font-weight:700;color:#1c1c1e;margin-bottom:6px;">📄 Documento pronto</div>
-      <div style="font-size:13px;color:#8e8e93;margin-bottom:24px;">${filename}</div>
-      <a href="${dataUri}" download="${filename}"
-        style="display:block;background:#e85d26;color:#fff;border-radius:14px;padding:16px;text-align:center;font-size:16px;font-weight:700;text-decoration:none;margin-bottom:14px;"
-        onclick="setTimeout(()=>{const o=document.getElementById('dlOverlay');if(o)o.remove();},1000)">
-        ⬇ Scarica .docx
-      </a>
-      <div style="font-size:12px;color:#8e8e93;text-align:center;margin-bottom:20px;line-height:1.6;">
-        Su iPhone: tieni premuto il link<br>e scegli <strong>"Scarica file collegato"</strong>
-      </div>
-      <button onclick="document.getElementById('dlOverlay').remove()" style="width:100%;background:#f2f2f7;border:none;border-radius:14px;padding:14px;font-size:15px;font-weight:600;color:#1c1c1e;font-family:'Inter',-apple-system,sans-serif;cursor:pointer;">Chiudi</button>
-    </div>`;
-  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
-  document.body.appendChild(overlay);
-}
-
-// ============================================================
-// PURE JS DOCX GENERATOR — zero dipendenze esterne
-// ============================================================
-
-// CRC32 table
-const CRC32=(()=>{const t=new Uint32Array(256);for(let i=0;i<256;i++){let c=i;for(let j=0;j<8;j++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[i]=c;}return(b,c=0xFFFFFFFF)=>{for(let i=0;i<b.length;i++)c=t[(c^b[i])&0xFF]^(c>>>8);return(c^0xFFFFFFFF)>>>0;};})();
-
-const enc=s=>new TextEncoder().encode(s);
-
+var TE = new TextEncoder();
 function u16(v){return new Uint8Array([v&0xFF,(v>>8)&0xFF]);}
-function u32(v){const a=new Uint8Array(4);new DataView(a.buffer).setUint32(0,v,true);return a;}
-function cat(...args){const tot=args.reduce((s,a)=>s+a.length,0);const r=new Uint8Array(tot);let o=0;for(const a of args){r.set(a,o);o+=a.length;}return r;}
-
-function dosTime(){const n=new Date();return((n.getFullYear()-1980)<<25|(n.getMonth()+1)<<21|n.getDate()<<16|n.getHours()<<11|n.getMinutes()<<5|(n.getSeconds()>>1))>>>0;}
+function u32(v){var a=new Uint8Array(4);new DataView(a.buffer).setUint32(0,v,true);return a;}
+function cat(){var tot=0;for(var i=0;i<arguments.length;i++)tot+=arguments[i].length;var r=new Uint8Array(tot),o=0;for(var i=0;i<arguments.length;i++){r.set(arguments[i],o);o+=arguments[i].length;}return r;}
+function dosTime(){var n=new Date();return((n.getFullYear()-1980)<<25|(n.getMonth()+1)<<21|n.getDate()<<16|n.getHours()<<11|n.getMinutes()<<5|(n.getSeconds()>>1))>>>0;}
 
 function zipStore(files){
-  const entries=[];let offset=0;
-  const dt=u32(dosTime());
-  for(const f of files){
-    const nb=enc(f.name);
-    const crc=CRC32(f.data);
-    const sz=f.data.length;
-    const lh=cat(new Uint8Array([0x50,0x4B,0x03,0x04]),u16(20),u16(0),u16(0),dt.slice(0,2),dt.slice(2,4),u32(crc),u32(sz),u32(sz),u16(nb.length),u16(0),nb);
-    entries.push({lh,data:f.data,nb,crc,sz,offset});
+  var entries=[],offset=0;
+  var dt=u32(dosTime());
+  for(var i=0;i<files.length;i++){
+    var f=files[i],nb=TE.encode(f.name),crc=CRC32(f.data),sz=f.data.length;
+    var lh=cat(new Uint8Array([0x50,0x4B,0x03,0x04]),u16(20),u16(0),u16(0),dt.slice(0,2),dt.slice(2,4),u32(crc),u32(sz),u32(sz),u16(nb.length),u16(0),nb);
+    entries.push({lh:lh,data:f.data,nb:nb,crc:crc,sz:sz,offset:offset});
     offset+=lh.length+sz;
   }
-  const cd=cat(...entries.map(e=>cat(new Uint8Array([0x50,0x4B,0x01,0x02]),u16(20),u16(20),u16(0),u16(0),u32(dosTime()),u32(e.crc),u32(e.sz),u32(e.sz),u16(e.nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(e.offset),e.nb)));
-  const cdOff=offset;
-  const eocd=cat(new Uint8Array([0x50,0x4B,0x05,0x06]),u16(0),u16(0),u16(entries.length),u16(entries.length),u32(cd.length),u32(cdOff),u16(0));
-  const parts=[];for(const e of entries){parts.push(e.lh);parts.push(e.data);}
-  return cat(...parts,cd,eocd);
+  var cdParts=[];
+  for(var i=0;i<entries.length;i++){
+    var e=entries[i];
+    cdParts.push(cat(new Uint8Array([0x50,0x4B,0x01,0x02]),u16(20),u16(20),u16(0),u16(0),dt.slice(0,2),dt.slice(2,4),u32(e.crc),u32(e.sz),u32(e.sz),u16(e.nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(e.offset),e.nb));
+  }
+  var cd=cat.apply(null,cdParts),cdOff=offset;
+  var eocd=cat(new Uint8Array([0x50,0x4B,0x05,0x06]),u16(0),u16(0),u16(entries.length),u16(entries.length),u32(cd.length),u32(cdOff),u16(0));
+  var parts=[];for(var i=0;i<entries.length;i++){parts.push(entries[i].lh);parts.push(entries[i].data);}
+  return cat.apply(null,parts.concat([cd,eocd]));
 }
 
-const xe=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+var xe = function(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');};
 
 function buildDocx(secs){
-  const hasBullets=secs.some(s=>s.bullet);
-  let body='';
+  var hasBullets = secs.some(function(s){return s.bullet;});
+  var body='';
 
-  for(const s of secs){
-    if(s.spacer){body+=`<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr></w:p>`;continue;}
+  for(var si=0;si<secs.length;si++){
+    var s=secs[si];
+    if(s.spacer){body+='<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr></w:p>';continue;}
 
-    // INDICE ROW: {toc: true, num: '1.', title: '...', indent: false}
+    // INDICE ROW
     if(s.toc){
-      const isH2=s.indent;
-      const leftInd=isH2?720:0;
-      // Tab stop a destra per il numero di pagina (9026 = larghezza testo)
-      body+=`<w:p>
-        <w:pPr>
-          <w:spacing w:before="${isH2?40:80}" w:after="${isH2?40:80}"/>
-          <w:ind w:left="${leftInd}"/>
-          <w:tabs>
-            <w:tab w:val="right" w:leader="dot" w:pos="9026"/>
-          </w:tabs>
-        </w:pPr>
-        <w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:u w:val="single"/></w:rPr>
-          <w:t xml:space="preserve">${xe(s.num)} ${xe(s.title)}</w:t>
-        </w:r>
-      </w:p>`;
+      var ind=s.indent?720:0;
+      body+='<w:p><w:pPr><w:spacing w:before="'+(s.indent?40:80)+'" w:after="'+(s.indent?40:80)+'"/>'
+        +(ind?'<w:ind w:left="'+ind+'"/>':'')
+        +'<w:tabs><w:tab w:val="right" w:leader="dot" w:pos="9026"/></w:tabs></w:pPr>'
+        +'<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:u w:val="single"/></w:rPr>'
+        +'<w:t xml:space="preserve">'+(s.num?xe(s.num)+' ':'')+xe(s.title)+'</w:t></w:r></w:p>';
       continue;
     }
 
+    // TABLE
     if(s.tableRows){
-      const cw=s.tw||s.tableRows[0].map(()=>Math.floor(9026/s.tableRows[0].length));
-      body+=`<w:tbl><w:tblPr><w:tblW w:w="${cw.reduce((a,b)=>a+b,0)}" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/><w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideH w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideV w:val="single" w:sz="4" w:color="AAAAAA"/></w:tblBorders></w:tblPr><w:tblGrid>${cw.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>`;
-      s.tableRows.forEach((row,ri)=>{
-        body+=`<w:tr>`;
-        row.forEach((cell,ci)=>{
-          body+=`<w:tc><w:tcPr><w:tcW w:w="${cw[ci]}" w:type="dxa"/><w:shd w:val="clear" w:color="auto" w:fill="${ri===0?'D5E8F0':'FFFFFF'}"/><w:tcMar><w:top w:w="80" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar></w:tcPr><w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/>${ri===0?'<w:b/>':''}</w:rPr><w:t xml:space="preserve">${xe(cell)}</w:t></w:r></w:p></w:tc>`;
-        });
-        body+=`</w:tr>`;
-      });
-      body+=`</w:tbl>`;
+      var cw=s.tw||[];
+      if(!cw.length) for(var ci=0;ci<s.tableRows[0].length;ci++) cw.push(Math.floor(9026/s.tableRows[0].length));
+      var tw=cw.reduce(function(a,b){return a+b;},0);
+      body+='<w:tbl><w:tblPr><w:tblW w:w="'+tw+'" w:type="dxa"/><w:tblBorders>'
+        +'<w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/>'
+        +'<w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/>'
+        +'<w:insideH w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideV w:val="single" w:sz="4" w:color="AAAAAA"/>'
+        +'</w:tblBorders></w:tblPr><w:tblGrid>'+cw.map(function(w){return '<w:gridCol w:w="'+w+'"/>';}).join('')+'</w:tblGrid>';
+      for(var ri=0;ri<s.tableRows.length;ri++){
+        var row=s.tableRows[ri];
+        body+='<w:tr>';
+        for(var ci=0;ci<row.length;ci++){
+          body+='<w:tc><w:tcPr><w:tcW w:w="'+cw[ci]+'" w:type="dxa"/>'
+            +'<w:shd w:val="clear" w:color="auto" w:fill="'+(ri===0?'D5E8F0':'FFFFFF')+'"/>'
+            +'<w:tcMar><w:top w:w="80" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>'
+            +'</w:tcPr><w:p><w:pPr><w:spacing w:before="40" w:after="40"/></w:pPr>'
+            +'<w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/>'+(ri===0?'<w:b/>':'')+'</w:rPr>'
+            +'<w:t xml:space="preserve">'+xe(row[ci])+'</w:t></w:r></w:p></w:tc>';
+        }
+        body+='</w:tr>';
+      }
+      body+='</w:tbl>';
       continue;
     }
-    let pPr='';
-    if(s.h===1) pPr=`<w:pStyle w:val="Heading1"/>`;
-    else if(s.h===2) pPr=`<w:pStyle w:val="Heading2"/>`;
-    else if(s.bullet) pPr=`<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:spacing w:before="40" w:after="40"/><w:ind w:left="720" w:hanging="360"/>`;
-    else pPr=`<w:spacing w:before="80" w:after="80"/>`;
 
-    let runs='';
-    const makeRPr=(r)=>{
-      let rp=`<w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/>`;
-      if(r.b||s.h)rp+=`<w:b/>`;
-      if(r.i)rp+=`<w:i/>`;
-      if(r.u)rp+=`<w:u w:val="single"/>`;
-      if(r.col)rp+=`<w:color w:val="${r.col}"/>`;
+    // PARAGRAPH
+    var pPr='',isH=s.h===1||s.h===2;
+    if(s.h===1) pPr='<w:pStyle w:val="Heading1"/>';
+    else if(s.h===2) pPr='<w:pStyle w:val="Heading2"/>';
+    else if(s.bullet) pPr='<w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/></w:numPr><w:spacing w:before="40" w:after="40"/><w:ind w:left="720" w:hanging="360"/>';
+    else pPr='<w:spacing w:before="80" w:after="80"/>';
+
+    function mkRPr(r,isH){
+      var rp='<w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/>';
+      if(r.b||isH) rp+='<w:b/>';
+      if(r.i) rp+='<w:i/>';
+      if(r.u) rp+='<w:u w:val="single"/>';
       return rp;
-    };
-    if(s.runs){
-      for(const r of s.runs) runs+=`<w:r><w:rPr>${makeRPr(r)}</w:rPr><w:t xml:space="preserve">${xe(r.t)}</w:t></w:r>`;
-    } else {
-      runs=`<w:r><w:rPr>${makeRPr(s)}</w:rPr><w:t xml:space="preserve">${xe(s.t||'')}</w:t></w:r>`;
     }
-    body+=`<w:p><w:pPr>${pPr}</w:pPr>${runs}</w:p>`;
+
+    var runs='';
+    if(s.runs){
+      for(var ri=0;ri<s.runs.length;ri++){
+        var r=s.runs[ri];
+        runs+='<w:r><w:rPr>'+mkRPr(r,false)+'</w:rPr><w:t xml:space="preserve">'+xe(r.t)+'</w:t></w:r>';
+      }
+    } else {
+      runs='<w:r><w:rPr>'+mkRPr(s,isH)+'</w:rPr><w:t xml:space="preserve">'+xe(s.t||'')+'</w:t></w:r>';
+    }
+    body+='<w:p><w:pPr>'+pPr+'</w:pPr>'+runs+'</w:p>';
   }
 
-  const numXml=hasBullets?`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="hybridMultilevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="&#x2022;"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>`:'';
+  var numXml=hasBullets
+    ?'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:numbering xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:abstractNum w:abstractNumId="0"><w:multiLevelType w:val="hybridMultilevel"/><w:lvl w:ilvl="0"><w:start w:val="1"/><w:numFmt w:val="bullet"/><w:lvlText w:val="&#x2022;"/><w:lvlJc w:val="left"/><w:pPr><w:ind w:left="720" w:hanging="360"/></w:pPr></w:lvl></w:abstractNum><w:num w:numId="1"><w:abstractNumId w:val="0"/></w:num></w:numbering>'
+    :'';
 
-  const docXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1134" w:bottom="1440" w:left="1134"/></w:sectPr></w:body></w:document>`;
+  var docXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+    +'<w:body>'+body
+    +'<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1134" w:bottom="1440" w:left="1134"/></w:sectPr>'
+    +'</w:body></w:document>';
 
-  const stylesXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="280" w:after="140"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:sz w:val="28"/><w:color w:val="1F3864"/></w:rPr></w:style><w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="100"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:sz w:val="26"/><w:color w:val="2E5090"/></w:rPr></w:style></w:styles>`;
+  var stylesXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+    +'<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr></w:rPrDefault></w:docDefaults>'
+    +'<w:style w:type="paragraph" w:styleId="Normal"><w:name w:val="Normal"/><w:pPr><w:spacing w:after="80"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/></w:rPr></w:style>'
+    +'<w:style w:type="paragraph" w:styleId="Heading1"><w:name w:val="heading 1"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="280" w:after="140"/><w:outlineLvl w:val="0"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:sz w:val="28"/><w:color w:val="1F3864"/></w:rPr></w:style>'
+    +'<w:style w:type="paragraph" w:styleId="Heading2"><w:name w:val="heading 2"/><w:basedOn w:val="Normal"/><w:pPr><w:spacing w:before="200" w:after="100"/><w:outlineLvl w:val="1"/></w:pPr><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:b/><w:sz w:val="26"/><w:color w:val="2E5090"/></w:rPr></w:style>'
+    +'</w:styles>';
 
-  const relsXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>${hasBullets?'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>':''}</Relationships>`;
+  var relsXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>'
+    +(hasBullets?'<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering" Target="numbering.xml"/>':'')
+    +'</Relationships>';
 
-  const ctXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>${hasBullets?'<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>':''}</Types>`;
+  var ctXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
+    +'<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>'
+    +'<Default Extension="xml" ContentType="application/xml"/>'
+    +'<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'
+    +'<Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/>'
+    +(hasBullets?'<Override PartName="/word/numbering.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml"/>':'')
+    +'</Types>';
 
-  const appRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+  var appRels='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
+    +'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
+    +'<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>'
+    +'</Relationships>';
 
-  const files=[
-    {name:'[Content_Types].xml',data:enc(ctXml)},
-    {name:'_rels/.rels',data:enc(appRels)},
-    {name:'word/document.xml',data:enc(docXml)},
-    {name:'word/styles.xml',data:enc(stylesXml)},
-    {name:'word/_rels/document.xml.rels',data:enc(relsXml)},
+  var files=[
+    {name:'[Content_Types].xml', data:TE.encode(ctXml)},
+    {name:'_rels/.rels', data:TE.encode(appRels)},
+    {name:'word/document.xml', data:TE.encode(docXml)},
+    {name:'word/styles.xml', data:TE.encode(stylesXml)},
+    {name:'word/_rels/document.xml.rels', data:TE.encode(relsXml)}
   ];
-  if(hasBullets)files.push({name:'word/numbering.xml',data:enc(numXml)});
+  if(hasBullets) files.push({name:'word/numbering.xml', data:TE.encode(numXml)});
   return zipStore(files);
 }
 
-// ============================================================
-// GENERATE DOCX
-// ============================================================
-async function generateDoc(){
-  const btn=document.getElementById('genBtn');
-  btn.disabled=true;btn.textContent='⏳';
-  try{
-    const v={
-      tipoAttivita:val('tipoAttivita'),comune:val('comune'),provincia:val('provincia'),
-      indirizzo:val('indirizzo'),motivazione:val('motivazione'),
-      tipoEdificio:val('tipoEdificio'),apertoAlPubblico:val('apertoAlPubblico'),
-      supTotale:val('supTotale'),
-      maxOccupanti:val('maxOccupanti'),collegamento:val('collegamento'),
-      attPrincNum:val('attPrincNum'),attPrincDesc:val('attPrincDesc'),attPrincPiano:val('attPrincPiano'),
-      attSecNum:attSecVisible?val('attSecNum'):'',
-      attSecDesc:attSecVisible?val('attSecDesc'):'',
-      attSecPiano:attSecVisible?val('attSecPiano'):'',
-      potenzaTotale:attSecVisible?val('potenzaTotale'):'',
-      classificazioneRischio:document.querySelector('#toggleRischio .on')?.textContent||'NON BASSO',
-      reiPareti:val('reiPareti'),reiSoffitti:val('reiSoffitti'),reiPorte:val('reiPorte'),
-      dotazionePorte:val('dotazionePorte'),carrello:val('carrello'),altroMezzo:val('altroMezzo'),
-      sorgentiInnesco:val('sorgentiInnesco').split('\n').filter(s=>s.trim()),
-      zonaAtex:val('zonaAtex'),motivazioneAtex:val('motivazioneAtex'),
-      impiantiProtezione:val('impiantiProtezione').split('\n').filter(s=>s.trim()),
-      sostanzePericolose:val('sostanzePericolose'),noteSostanze:val('noteSostanze'),
-      larghAccessoVVF:val('larghAccessoVVF'),distanzaEdificio:val('distanzaEdificio'),
-      noteAccessibilita:val('noteAccessibilita'),luogoSicuro:val('luogoSicuro'),
-      luogoTemp:val('luogoTemp'),ventilazione:val('ventilazione'),
-      normaidranti:val('normaidranti'),livelloPericolosita:val('livelloPericolosita'),
-      tipoIdranti:val('tipoIdranti'),autonomiaEmerg:val('autonomiaEmerg'),
-      numEsercitazioni:val('numEsercitazioni'),estintore1:val('estintore1'),
-      estintore2:val('estintore2'),distanzaEstintori:val('distanzaEstintori'),
-      misureAggiuntive:val('misureAggiuntive'),
-      deltaOcc:val('deltaOcc').split(' ')[0],
-      normativaDesc: normative.map(n=>`${n.desc}: ${n.ref}`).join('; '),
-      codicePI: normative[0]?.ref || 'DM 03/08/2015',
-      rtvCentrale: normative[1]?.ref || 'DM 08/11/2019',
-    };
+// =====================================================
+// GENERATE
+// =====================================================
+function generateDoc() {
+  var btn=document.getElementById('genBtn');
+  btn.disabled=true; btn.textContent='⏳';
 
-    const fd=forni.map(f=>`${f.desc} da ${f.kw} kW`).join(', ');
-    const p=(t,opts={})=>({t,...opts});
-    const h1=t=>({t,h:1});
-    const h2=t=>({t,h:2});
-    const bul=t=>({t,bullet:true});
-    const sp=()=>({spacer:true});
-    const tbl=(tableRows,tw)=>({tableRows,tw});
-    const runs=arr=>({runs:arr});
+  setTimeout(function(){
+    try {
+      var v = {
+        tipoAttivita:val('tipoAttivita'), comune:val('comune'), provincia:val('provincia'),
+        indirizzo:val('indirizzo'), motivazione:val('motivazione'),
+        tipoEdificio:val('tipoEdificio'), apertoAlPubblico:val('apertoAlPubblico'),
+        supTotale:val('supTotale'), maxOccupanti:val('maxOccupanti'), collegamento:val('collegamento'),
+        attPrincNum:val('attPrincNum'), attPrincDesc:val('attPrincDesc'), attPrincPiano:val('attPrincPiano'),
+        attSecNum:val('attSecNum'), attSecDesc:val('attSecDesc'), attSecPiano:val('attSecPiano'), potenzaTotale:val('potenzaTotale'),
+        rischio:(document.querySelector('#togRischio .on')||{}).textContent||'NON BASSO',
+        reiPareti:val('reiPareti'), reiSoffitti:val('reiSoffitti'), reiPorte:val('reiPorte'), dotazionePorte:val('dotazionePorte'),
+        carrello:val('carrello'), altroMezzo:val('altroMezzo'),
+        sorgentiInnesco:val('sorgentiInnesco').split('\n').filter(function(s){return s.trim();}),
+        zonaAtex:val('zonaAtex'), motivazioneAtex:val('motivazioneAtex'),
+        impiantiProtezione:val('impiantiProtezione').split('\n').filter(function(s){return s.trim();}),
+        sostanzePericolose:val('sostanzePericolose'), noteSostanze:val('noteSostanze'),
+        larghAccessoVVF:val('larghAccessoVVF'), distanzaEdificio:val('distanzaEdificio'),
+        noteAccessibilita:val('noteAccessibilita'), luogoSicuro:val('luogoSicuro'), luogoTemp:val('luogoTemp'),
+        ventilazione:val('ventilazione'), normaidranti:val('normaidranti'), livelloPericolosita:val('livelloPericolosita'),
+        tipoIdranti:val('tipoIdranti'), autonomiaEmerg:val('autonomiaEmerg'),
+        numEsercitazioni:val('numEsercitazioni'), estintore1:val('estintore1'), estintore2:val('estintore2'),
+        distanzaEstintori:val('distanzaEstintori'), misureAggiuntive:val('misureAggiuntive'),
+        deltaOcc:val('deltaOcc').split(' ')[0]
+      };
 
-    const secs=[
-      runs([{t:'ALLEGATO 1',b:true,u:true}]),
-      sp(),
-      runs([{t:'VALUTAZIONE DEL RISCHIO CON METODO DESCRITTIVO',b:true,u:true}]),
-      sp(),sp(),
+      var fd = forni.map(function(f){return f.desc+' da '+f.kw+' kW';}).join(', ');
+      var normRefs = normative.map(function(n){return n.ref;}).join(', ');
 
-      // ---- INDICE ----
-      {runs:[{t:'Indice',b:true}]},
-      sp(),
-      {toc:true, num:'1.', title:'PREMESSA'},
-      {toc:true, num:'2.', title:'Allegato A - Valutazione del rischio incendio'},
-      ...(attSecVisible?[
-        {toc:true, num:'', title:`Attivita n. ${v.attPrincNum}`, indent:true},
-        {toc:true, num:'', title:`Attivita n. ${v.attSecNum}`, indent:true},
-      ]:[
-        {toc:true, num:'', title:`Attivita n. ${v.attPrincNum}`, indent:true},
-      ]),
-      {toc:true, num:'2.1.', title:`Valutazione del rischio d'incendio. Metodo Descrittivo.`, indent:true},
-      {toc:true, num:'2.2.', title:`Individuazione dei pericoli d'incendio`, indent:true},
-      {toc:true, num:'2.3.', title:'Individuazione delle sorgenti di innesco', indent:true},
-      {toc:true, num:'2.4.', title:'Individuazione dei materiali combustibili o infiammabili', indent:true},
-      {toc:true, num:'2.5.', title:'Carico di incendio', indent:true},
-      {toc:true, num:'2.6.', title:'Interazione inneschi-combustibili', indent:true},
-      {toc:true, num:'2.7.', title:'Eventuali quantitativi rilevanti di sostanze pericolose', indent:true},
-      {toc:true, num:'2.8.', title:`Lavorazioni pericolose ai fini dell'incendio o dell'esplosione`, indent:true},
-      {toc:true, num:'2.9.', title:'Possibile formazione di atmosfere esplosive', indent:true},
-      {toc:true, num:'3.', title:`Descrizione del contesto e dell'ambiente nei quali i pericoli sono inseriti`},
-      {toc:true, num:'3.1.', title:'Accessibilita e viabilita', indent:true},
-      {toc:true, num:'3.2.', title:'Layout aziendale', indent:true},
-      {toc:true, num:'3.3.', title:'Distanziamenti e compartimentazioni', indent:true},
-      {toc:true, num:'3.4.', title:'Ventilazione e smaltimento dei fumi', indent:true},
-      {toc:true, num:'3.5.', title:`Determinazione di quantita e tipologia degli occupanti esposti al rischio d'incendio`, indent:true},
-      {toc:true, num:'4.', title:`Individuazione dei beni esposti al rischio d'incendio`},
-      {toc:true, num:'5.', title:`Valutazione qualitativa o quantitativa delle conseguenze dell'incendio su occupanti, beni e ambiente`},
-      {toc:true, num:'5.1.', title:'Sugli occupanti', indent:true},
-      {toc:true, num:'5.2.', title:'Sui beni', indent:true},
-      {toc:true, num:'5.3.', title:`Sull'ambiente`, indent:true},
-      {toc:true, num:'6.', title:'Individuazione delle misure preventive che possano rimuovere o ridurre i pericoli che determinano rischi significativi'},
-      {toc:true, num:'7.', title:'Valutazione del rischio residuo di incendio'},
-      {toc:true, num:'8.', title:'Profilo di rischio Rvita (tabb. da G.3-1 a G.3-4)'},
-      {toc:true, num:'9.', title:'Valutazione del Profilo di Rischio Rvita'},
-      sp(),sp(),
-      // ---- FINE INDICE ----
+      function p(t,b){return {t:t,b:!!b};}
+      function h1(t){return {t:t,h:1};}
+      function h2(t){return {t:t,h:2};}
+      function bul(t){return {t:t,bullet:true};}
+      function sp(){return {spacer:true};}
+      function tbl(rows,tw){return {tableRows:rows,tw:tw};}
+      function runs(arr){return {runs:arr};}
+      function toc(num,title,indent){return {toc:true,num:num,title:title,indent:!!indent};}
 
-      h1('1. PREMESSA'),
-      p(`La presente valutazione del rischio incendio analizza le "più severe ma credibili ipotesi d'incendio" e le conseguenti ripercussioni su occupanti, beni e ambiente.`),
-      sp(),
-      p(`Nello specifico, la presente riguarda la realizzazione di un opificio per la ${v.tipoAttivita} all'interno di un edificio ${v.tipoEdificio} della zona industriale del Comune di ${v.comune} (${v.provincia}) in ${v.indirizzo}.`),
-      sp(),
-      p(v.motivazione),
-      sp(),
-      p('Questa modifica configura due attività soggette secondo il DPR 151/2011:'),
-      sp(),
-      runs([{t:`Attività Principale ${v.attPrincNum}: `,b:true},{t:v.attPrincDesc}]),
-      sp(),
-      ...(attSecVisible ? [
-        runs([{t:`Attività soggetta N. ${v.attSecNum}: `,b:true},{t:`${v.attSecDesc} Saranno presenti ${fd} per un totale di ${v.potenzaTotale} kW.`}]),
+      var secs = [
+        // TITOLO
+        runs([{t:'ALLEGATO 1',b:true,u:true}]),
         sp(),
-      ] : []),
-      p(`Le mutate condizioni richiedono la procedura di esame progetto da parte del Comando VVF di ${v.comune}.`),
+        runs([{t:'VALUTAZIONE DEL RISCHIO CON METODO DESCRITTIVO',b:true,u:true}]),
+        sp(),sp(),
 
-      h1('2. Allegato A - Valutazione del rischio incendio'),
-      p(`La presente valutazione costituisce parte integrante del DVR di cui all'art. 17, comma 1, lett. a), D.Lgs. n. 81/2008.`),
-      sp(),
-      p(`Attivita n. ${v.attPrincNum}: ${v.attPrincDesc}`,{b:true}),
-      ...(attSecVisible ? [p(`Attivita n. ${v.attSecNum}: ${v.attSecDesc}`)] : []),
-      sp(),
-      p('Normativa applicabile:',{b:true}),
-      ...normative.map(n=>bul(`${n.desc}: ${n.ref}`)),
+        // INDICE
+        runs([{t:'Indice',b:true}]),
+        sp(),
+        toc('1.','PREMESSA'),
+        toc('2.','Allegato A - Valutazione del rischio incendio'),
+        toc('','Attivita n. '+v.attPrincNum,true)
+      ].concat(
+        attSecVisible ? [toc('','Attivita n. '+v.attSecNum,true)] : []
+      ).concat([
+        toc('2.1.',"Valutazione del rischio d'incendio. Metodo Descrittivo.",true),
+        toc('2.2.',"Individuazione dei pericoli d'incendio",true),
+        toc('2.3.','Individuazione delle sorgenti di innesco',true),
+        toc('2.4.','Individuazione dei materiali combustibili o infiammabili',true),
+        toc('2.5.','Carico di incendio',true),
+        toc('2.6.','Interazione inneschi-combustibili',true),
+        toc('2.7.','Eventuali quantitativi rilevanti di sostanze pericolose',true),
+        toc('2.8.',"Lavorazioni pericolose ai fini dell'incendio o dell'esplosione",true),
+        toc('2.9.','Possibile formazione di atmosfere esplosive',true),
+        toc('3.',"Descrizione del contesto e dell'ambiente nei quali i pericoli sono inseriti"),
+        toc('3.1.','Accessibilita e viabilita',true),
+        toc('3.2.','Layout aziendale',true),
+        toc('3.3.','Distanziamenti e compartimentazioni',true),
+        toc('3.4.','Ventilazione e smaltimento dei fumi',true),
+        toc('3.5.',"Determinazione di quantita e tipologia degli occupanti esposti al rischio d'incendio",true),
+        toc('4.',"Individuazione dei beni esposti al rischio d'incendio"),
+        toc('5.',"Valutazione qualitativa o quantitativa delle conseguenze dell'incendio su occupanti, beni e ambiente"),
+        toc('5.1.','Sugli occupanti',true),
+        toc('5.2.','Sui beni',true),
+        toc('5.3.',"Sull'ambiente",true),
+        toc('6.','Individuazione delle misure preventive che possano rimuovere o ridurre i pericoli che determinano rischi significativi'),
+        toc('7.','Valutazione del rischio residuo di incendio'),
+        toc('8.','Profilo di rischio Rvita (tabb. da G.3-1 a G.3-4)'),
+        toc('9.','Valutazione del Profilo di Rischio Rvita'),
+        sp(),sp(),
 
-      h2(`2.1. Valutazione del rischio d'incendio. Metodo Descrittivo.`),
-      p(`L'attivita soggetta principale ${v.attPrincNum} e localizzata al ${v.attPrincPiano}.${attSecVisible?' L\'attivita di produzione '+v.attSecNum+' si svolge al '+v.attSecPiano+' dove sono presenti '+fd+'.':''}`),
-      sp(),
-      p(`L'edificio ${v.apertoAlPubblico==='no'?'non e aperto al pubblico':'e aperto al pubblico'}${v.supTotale>0?', ha una superficie totale di '+v.supTotale+' m²,':''} e presenta i seguenti piani collegati da ${v.collegamento}:`),
-      sp(),
-      ...piani.map(piano=>bul(`${piano.nome}${piano.sup>0?' ('+piano.sup+' m²)':''}: ${piano.desc}`)),
-      sp(),
-      runs([{t:'Il rischio e classificato '},{t:v.classificazioneRischio,b:true},{t:`. Si applicano le normative: ${normative.map(n=>n.ref).join(', ')}.`}]),
-      sp(),
-      p(`Il numero complessivo di occupanti nell'intero edificio sara al massimo di ${v.maxOccupanti} persone.`),
+        // 1. PREMESSA
+        h1('1. PREMESSA'),
+        p("La presente valutazione del rischio incendio analizza le piu severe ma credibili ipotesi d'incendio e le conseguenti ripercussioni su occupanti, beni e ambiente."),
+        sp(),
+        p("Nello specifico, la presente riguarda la realizzazione di un opificio per la "+v.tipoAttivita+" all'interno di un edificio "+v.tipoEdificio+" della zona industriale del Comune di "+v.comune+" ("+v.provincia+") in "+v.indirizzo+"."),
+        sp(),
+        p(v.motivazione),
+        sp(),
+        p('Questa modifica configura le seguenti attivita soggette secondo il DPR 151/2011:'),
+        sp(),
+        runs([{t:'Attivita Principale '+v.attPrincNum+': ',b:true},{t:v.attPrincDesc}])
+      ]).concat(
+        attSecVisible ? [
+          sp(),
+          runs([{t:'Attivita soggetta N. '+v.attSecNum+': ',b:true},{t:v.attSecDesc+' Saranno presenti '+fd+' per un totale di '+v.potenzaTotale+' kW.'}])
+        ] : []
+      ).concat([
+        sp(),
+        p("Le mutate condizioni richiedono la procedura di esame progetto da parte del Comando Provinciale dei VVF di "+v.comune+"."),
 
-      h2(`2.2. Individuazione dei pericoli d'incendio`),
-      p(`Tra i pericoli di incendio ragionevolmente prevedibili e possibile individuare:`),
-      sp(),
-      ...pericoli.map(bul),
+        // 2. ALLEGATO A
+        h1('2. Allegato A - Valutazione del rischio incendio'),
+        p("La presente valutazione costituisce parte integrante del DVR di cui all'art. 17, comma 1, lett. a), D.Lgs. n. 81/2008."),
+        sp(),
+        p('Attivita n. '+v.attPrincNum+': '+v.attPrincDesc,true)
+      ]).concat(
+        attSecVisible ? [p('Attivita n. '+v.attSecNum+': '+v.attSecDesc)] : []
+      ).concat([
+        sp(),
+        p('Normativa applicabile:',true)
+      ]).concat(
+        normative.map(function(n){return bul(n.desc+': '+n.ref);})
+      ).concat([
 
-      h2('2.3. Individuazione delle sorgenti di innesco'),
-      p('Come cause di innesco e possibile individuare:'),
-      sp(),
-      ...v.sorgentiInnesco.map(bul),
+        h2("2.1. Valutazione del rischio d'incendio. Metodo Descrittivo."),
+        p("L'attivita soggetta principale "+v.attPrincNum+" e localizzata al "+v.attPrincPiano+"."
+          +(attSecVisible?" L'attivita di produzione "+v.attSecNum+" si svolge al "+v.attSecPiano+" dove sono presenti "+fd+".":"")),
+        sp(),
+        p("L'edificio "+(v.apertoAlPubblico==='no'?'non e aperto al pubblico':'e aperto al pubblico')
+          +(parseFloat(v.supTotale)>0?', ha una superficie totale di '+v.supTotale+' m\xb2,':'')
+          +' e presenta i seguenti piani collegati da '+v.collegamento+':'),
+        sp()
+      ]).concat(
+        piani.map(function(piano){
+          return bul(piano.nome+(piano.sup>0?' ('+piano.sup+' m\xb2)':'')+': '+piano.desc);
+        })
+      ).concat([
+        sp(),
+        runs([{t:'Il rischio e classificato '},{t:v.rischio,b:true},{t:'. Si applicano le normative: '+normRefs+'.'}]),
+        sp(),
+        p("Il numero complessivo di occupanti nell'intero edificio sara al massimo di "+v.maxOccupanti+" persone."),
 
-      h2('2.4. Individuazione dei materiali combustibili o infiammabili'),
-      p('I materiali combustibili presenti sono:'),sp(),
-      ...combustibili.map(bul),
+        h2("2.2. Individuazione dei pericoli d'incendio"),
+        p("Tra i pericoli di incendio ragionevolmente prevedibili e possibile individuare:"),
+        sp()
+      ]).concat(
+        pericoli.map(bul)
+      ).concat([
+        h2("2.3. Individuazione delle sorgenti di innesco"),
+        p("Come cause di innesco e possibile individuare:"),
+        sp()
+      ]).concat(
+        v.sorgentiInnesco.map(bul)
+      ).concat([
+        h2("2.4. Individuazione dei materiali combustibili o infiammabili"),
+        p("I materiali combustibili presenti sono:"),
+        sp()
+      ]).concat(
+        combustibili.map(bul)
+      ).concat([
+        h2("2.5. Carico di incendio"),
+        p("Sistemi di protezione attiva che riducono il carico specifico:"),
+        sp()
+      ]).concat(
+        v.impiantiProtezione.map(bul)
+      ).concat([
+        sp(),p("Carichi di incendio:",true),sp()
+      ]).concat(
+        compartimenti.map(function(c){return p(c.nome+" ("+c.piano+"): qf = "+c.qf+" MJ/mq - qfd = "+c.qfd+" MJ/mq");})
+      ).concat([
+        sp(),
+        p(v.sostanzePericolose==='no'?"Non sono previste sostanze classificate come pericolose. "+v.noteSostanze:"Sostanze pericolose presenti: "+v.noteSostanze),
 
-      h2('2.5. Carico di incendio'),
-      p('Sistemi di protezione attiva (riducono il carico specifico):'),
-      ...v.impiantiProtezione.map(bul),
-      sp(),
-      p('Carichi di incendio:',{b:true}),sp(),
-      ...compartimenti.map(c=>p(`${c.nome} (${c.piano}): qf = ${c.qf} MJ/mq - qfd = ${c.qfd} MJ/mq`)),
-      sp(),
-      p(v.sostanzePericolose==='no'?`Non sono previste sostanze pericolose. ${v.noteSostanze}`:`Sostanze pericolose presenti: ${v.noteSostanze}`),
+        h2("2.6. Interazione inneschi-combustibili"),
+        p("Le interazioni sono limitate da:"),sp(),
+        bul("Compartimentazione del locale forni rispetto a depositi e uffici"),
+        bul("Misure di sicurezza secondo "+normRefs+" nel locale forni"),
+        bul("Procedure operative per uso sicuro delle apparecchiature"),
+        bul("Formazione e informazione del personale"),
 
-      h2('2.6. Interazione inneschi-combustibili'),
-      p('Le interazioni sono limitate da:'),sp(),
-      bul('Compartimentazione del locale forni rispetto a depositi e uffici'),
-      bul(`Misure di sicurezza secondo ${normative.map(n=>n.ref).join(', ')} nel locale forni`),
-      bul('Procedure operative per uso sicuro delle apparecchiature'),
-      bul('Formazione e informazione del personale'),
+        h2("2.7. Eventuali quantitativi rilevanti di sostanze pericolose"),
+        p("Non sono presenti sostanze pericolose che potrebbero aggravare un incendio."),
 
-      h2('2.7. Eventuali quantitativi rilevanti di sostanze pericolose'),
-      p('Non sono presenti sostanze pericolose che potrebbero aggravare un incendio.'),
+        h2("2.8. Lavorazioni pericolose ai fini dell'incendio o dell'esplosione"),
+        p("Non sono presenti lavorazioni a rischio. Le attivita si limitano al prelievo controllato di materie prime, uso di apparecchiature elettroniche e movimentazione con "+v.carrello+" e "+v.altroMezzo+"."),
 
-      h2(`2.8. Lavorazioni pericolose ai fini dell'incendio o dell'esplosione`),
-      p(`Non sono presenti lavorazioni a rischio. Le attivita si limitano al prelievo di materie prime, uso di apparecchiature elettroniche e movimentazione con ${v.carrello} e ${v.altroMezzo}.`),
+        h2("2.9. Possibile formazione di atmosfere esplosive"),
+        p(v.motivazioneAtex+" La probabilita di presenza di ATEX e trascurabile (Zona "+v.zonaAtex+")."),
 
-      h2('2.9. Possibile formazione di atmosfere esplosive'),
-      p(`${v.motivazioneAtex} La probabilita di presenza di ATEX e trascurabile (Zona ${v.zonaAtex}).`),
+        h1("3. Descrizione del contesto e dell'ambiente nei quali i pericoli sono inseriti"),
 
-      h1(`3. Descrizione del contesto e dell'ambiente nei quali i pericoli sono inseriti`),
+        h2("3.1. Accessibilita e viabilita"),
+        p("L'edificio e localizzato nella zona industriale di "+v.comune+" con accesso di larghezza "+v.larghAccessoVVF+" m per i mezzi VVF. "+v.noteAccessibilita+" Distanza dall'edificio limitrofo piu vicino: "+v.distanzaEdificio+" m > 15 m."),
 
-      h2('3.1. Accessibilita e viabilita'),
-      p(`L'edificio e localizzato nella zona industriale di ${v.comune} con accesso di larghezza ${v.larghAccessoVVF} m. ${v.noteAccessibilita} Distanza dall'edificio limitrofo: ${v.distanzaEdificio} m > 15 m.`),
+        h2("3.2. Layout aziendale"),
+        p("Tutti i percorsi di esodo raggiungono "+v.luogoTemp+", collegato al luogo sicuro: "+v.luogoSicuro+"."),
 
-      h2('3.2. Layout aziendale'),
-      p(`Tutti i percorsi di esodo raggiungono ${v.luogoTemp}, collegato al luogo sicuro: ${v.luogoSicuro}.`),
+        h2("3.3. Distanziamenti e compartimentazioni"),
+        p("Misure di compartimentazione garantite:"),sp(),
+        bul("Pareti perimetrali: "+v.reiPareti),
+        bul("Soffitti: "+v.reiSoffitti),
+        bul("Porte tagliafuoco: "+v.reiPorte+" con "+v.dotazionePorte),
 
-      h2('3.3. Distanziamenti e compartimentazioni'),
-      p('Misure di compartimentazione garantite:'),sp(),
-      bul(`Pareti perimetrali: ${v.reiPareti}`),
-      bul(`Soffitti: ${v.reiSoffitti}`),
-      bul(`Porte tagliafuoco: ${v.reiPorte} con ${v.dotazionePorte}`),
+        h2("3.4. Ventilazione e smaltimento dei fumi"),
+        p(v.ventilazione),
 
-      h2('3.4. Ventilazione e smaltimento dei fumi'),
-      p(v.ventilazione),
+        h2("3.5. Determinazione di quantita e tipologia degli occupanti esposti al rischio d'incendio"),
+        p("L'edificio e utilizzato esclusivamente da lavoratori dipendenti deambulanti, in stato di veglia, con familiarita con l'edificio. Affollamento massimo: "+v.maxOccupanti+" occupanti."),
 
-      h2(`3.5. Determinazione degli occupanti esposti al rischio d'incendio`),
-      p(`L'edificio e utilizzato esclusivamente da lavoratori dipendenti deambulanti, in stato di veglia, con familiarita con l'edificio. Affollamento massimo: ${v.maxOccupanti} occupanti.`),
+        h1("4. Individuazione dei beni esposti al rischio d'incendio"),
+        p("I beni principali sono i forni, gli impianti, i prodotti finiti e le materie prime. E' prevista rete idranti interna e impianto IRAI per la protezione dei beni."),
 
-      h1(`4. Individuazione dei beni esposti al rischio d'incendio`),
-      p(`I beni principali sono i forni, gli impianti, i prodotti finiti e le materie prime. E' prevista rete idranti interna e impianto IRAI.`),
+        h1("5. Valutazione qualitativa o quantitativa delle conseguenze dell'incendio su occupanti, beni e ambiente"),
+        h2("5.1. Sugli occupanti"),
+        p("I pericoli principali derivano da mancanza di ossigeno, composti tossici e fumo. L'esposizione prolungata si considera improbabile grazie ai percorsi di esodo adeguati e alla compartimentazione."),
+        h2("5.2. Sui beni"),
+        p("Grazie alla rete idranti e al sistema IRAI si ritengono accettabili gli eventuali danni ai beni."),
+        h2("5.3. Sull'ambiente"),
+        p("L'edificio isolato e la rete idranti rendono improbabile la formazione di fumo e calore tale da danneggiare edifici circostanti e l'ambiente."),
 
-      h1(`5. Valutazione delle conseguenze dell'incendio su occupanti, beni e ambiente`),
-      h2('5.1. Sugli occupanti'),
-      p(`I pericoli principali derivano da mancanza di ossigeno, composti tossici e fumo. L'esposizione prolungata si considera improbabile grazie ai percorsi di esodo e alla compartimentazione.`),
-      h2('5.2. Sui beni'),
-      p(`Grazie alla rete idranti e al sistema IRAI si ritengono accettabili gli eventuali danni ai beni.`),
-      h2(`5.3. Sull'ambiente`),
-      p(`L'edificio isolato e la rete idranti rendono improbabile la formazione di fumo e calore tale da danneggiare edifici circostanti e l'ambiente.`),
+        h1("6. Individuazione delle misure preventive che possano rimuovere o ridurre i pericoli che determinano rischi significativi")
+      ]).concat(
+        [
+          ["Limitazione dei materiali combustibili","Limitare i quantitativi ai necessari. E' fatto divieto di introdurre ulteriori materiali combustibili in ciascun compartimento."],
+          ["Impianti a regola d'arte","Gli impianti devono essere realizzati conformemente e sottoposti a regolari manutenzioni e controlli periodici."],
+          ["Attrezzature e macchinari","Conformi alle direttive, marcatura CE, utilizzati in conformita al manuale d'uso e manutenzione."],
+          ["Formazione e informazione","Conforme a "+normRefs+"."],
+          ["Pulizia e mantenimento dell'ordine", v.misureAggiuntive],
+          ["Divieto di fumo","Disposizioni di divieto di fumo vigenti per tutti i locali con preposti alla sorveglianza."],
+          ["Presidi antincendio", v.estintore1+". "+v.estintore2+" con distanza inferiore a "+v.distanzaEstintori+" m."],
+          ["Rete idranti interna","Rete idranti "+v.tipoIdranti+" progettata secondo "+v.normaidranti+" con livello di pericolosita "+v.livelloPericolosita+"."],
+          ["Impianto di rivelazione incendi","Impianto di rivelazione fumo e calore esteso a tutta l'attivita."],
+          ["Piano di Emergenza ed Evacuazione","Predisposto ai sensi dell'art. 2 del D.M. 2 settembre 2021. Esercitazioni: almeno "+v.numEsercitazioni+" all'anno."]
+        ].reduce(function(acc,m){return acc.concat([runs([{t:m[0],b:true,i:true}]),p(m[1]),sp()]);}, [])
+      ).concat([
+        h1("7. Valutazione del rischio residuo di incendio"),
+        p("Per limitare lo sviluppo e la propagazione di un eventuale incendio e' previsto:"),sp(),
+        bul("Compartimentazione "+v.reiPareti+" di tutti i compartimenti"),
+        bul("Sistema di gestione della sicurezza antincendio (GSA)"),
+        bul("Impianto di rivelazione ed allarme incendi esteso a tutta l'attivita"),
+        bul("Rete idranti "+v.tipoIdranti),
+        bul(v.estintore1+" con distanza < "+v.distanzaEstintori+" m"),
+        bul(v.estintore2+" con distanza < "+v.distanzaEstintori+" m"),
 
-      h1(`6. Individuazione delle misure preventive che possano rimuovere o ridurre i pericoli`),
-      ...[
-        ['Limitazione dei materiali combustibili',`Limitare i quantitativi ai necessari. E' fatto divieto di introdurre ulteriori materiali combustibili in ciascun compartimento.`],
-        [`Impianti a regola d'arte`,`Gli impianti devono essere realizzati conformemente e sottoposti a regolari manutenzioni.`],
-        ['Attrezzature e macchinari',`Conformi alle direttive, marcatura CE, utilizzati in conformita al manuale d'uso e manutenzione.`],
-        ['Formazione e informazione',`Conforme al D.M. 02/09/2021 e al D.Lgs. n. 81/2008.`],
-        [`Pulizia e mantenimento dell'ordine`,v.misureAggiuntive],
-        ['Divieto di fumo','Disposizioni di divieto di fumo vigenti per tutti i locali.'],
-        ['Presidi antincendio',`${v.estintore1}. ${v.estintore2} con distanza inferiore a ${v.distanzaEstintori} m.`],
-        ['Rete idranti interna',`Rete idranti ${v.tipoIdranti} progettata secondo ${v.normaidranti} con livello di pericolosita ${v.livelloPericolosita}.`],
-        ['Impianto di rivelazione incendi',`Impianto di rivelazione fumo e calore esteso a tutta l'attivita.`],
-        ['Piano di Emergenza ed Evacuazione',`Predisposto ai sensi dell'art. 2 del D.M. 2 settembre 2021. Esercitazioni: almeno ${v.numEsercitazioni} all'anno.`],
-      ].flatMap(([title,text])=>[
-        runs([{t:title,b:true,i:true}]),
-        p(text),sp()
-      ]),
+        h1("8. Profilo di rischio Rvita (tabb. da G.3-1 a G.3-4)"),
+        p("Il profilo di rischio Rvita e attribuito in relazione a:"),
+        bul("delta-occ: caratteristiche prevalenti degli occupanti"),
+        bul("delta-alpha: velocita caratteristica prevalente di crescita dell'incendio"),
 
-      h1('7. Valutazione del rischio residuo di incendio'),
-      p(`Per limitare lo sviluppo e la propagazione di un eventuale incendio e' previsto:`),sp(),
-      bul(`Compartimentazione ${v.reiPareti} di tutti i compartimenti`),
-      bul(`Sistema di gestione della sicurezza antincendio (GSA)`),
-      bul(`Impianto di rivelazione ed allarme incendi esteso a tutta l'attivita`),
-      bul(`Rete idranti ${v.tipoIdranti}`),
-      bul(`${v.estintore1} con distanza < ${v.distanzaEstintori} m`),
-      bul(`${v.estintore2} con distanza < ${v.distanzaEstintori} m`),
+        h1("9. Valutazione del Profilo di Rischio Rvita"),
+        p("L'attivita e frequentata da occupanti in stato di veglia con familiarita con l'edificio (delta-occ = "+v.deltaOcc+"). Non e' prevista la presenza di pubblico."),
+        sp(),
+        tbl(
+          [['Compartimento','delta-alpha','Rvita']].concat(
+            compartimenti.map(function(c){return [c.nome+' - '+c.piano, c.da||'2', c.rvita||'A1'];})
+          ),
+          [6500,1000,1526]
+        )
+      ]);
 
-      h1('8. Profilo di rischio Rvita (tabb. da G.3-1 a G.3-4)'),
-      p('Il profilo di rischio Rvita e attribuito in relazione a:'),
-      bul('docc: caratteristiche prevalenti degli occupanti'),
-      bul('dalpha: velocita caratteristica prevalente di crescita dell\'incendio'),
+      var buf = buildDocx(secs);
+      // base64
+      var binary='',chunk=8192;
+      for(var i=0;i<buf.length;i+=chunk){
+        var sub=buf.subarray(i,i+chunk);
+        for(var j=0;j<sub.length;j++) binary+=String.fromCharCode(sub[j]);
+      }
+      var b64=btoa(binary);
+      var fname='VRI_'+v.comune+'_'+new Date().toISOString().slice(0,10)+'.docx';
+      var dataUri='data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,'+b64;
 
-      h1('9. Valutazione del Profilo di Rischio Rvita'),
-      p(`L'attivita e frequentata da occupanti in stato di veglia con familiarita con l'edificio (docc = ${v.deltaOcc}). Non e' prevista la presenza di pubblico.`),
-      sp(),
-      tbl(
-        [['Compartimento','d-alpha','Rvita'],...compartimenti.map(c=>[`${c.nome} - ${c.piano}`,c.deltaAlpha||'2',c.rvita||'A1'])],
-        [6500,1000,1526]
-      ),
-    ];
+      document.getElementById('dlName').textContent = fname;
+      var lnk=document.getElementById('dlLink');
+      lnk.href=dataUri;
+      lnk.download=fname;
+      document.getElementById('dlOverlay').style.display='flex';
 
-    const buf=buildDocx(secs);
-    let binary='';
-    const chunk=8192;
-    for(let i=0;i<buf.length;i+=chunk)
-      binary+=String.fromCharCode(...buf.subarray(i,i+chunk));
-    const b64=btoa(binary);
-    const dataUri='data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,'+b64;
-    showDownloadOverlay(dataUri,`VRI_${v.comune}_${new Date().toISOString().slice(0,10)}.docx`);
-
-  }catch(e){
-    console.error(e);
-    alert('Errore:\n'+e.message);
-  }
-  btn.disabled=false;btn.textContent='⬇ Genera';
+    } catch(e) {
+      alert('Errore:\n'+e.message+'\n\n'+e.stack);
+    }
+    btn.disabled=false; btn.textContent='⬇ Genera';
+  }, 50);
 }
 </script>
 </body>
