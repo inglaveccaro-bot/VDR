@@ -450,6 +450,10 @@ select.val-right { max-width: 160px; }
         </select>
       </div>
       <div class="form-row row-h">
+        <label class="field-label">Superficie totale edificio (m²)</label>
+        <input type="number" id="supTotale" value="0" class="val-right" style="text-align:right;max-width:80px">
+      </div>
+      <div class="form-row row-h">
         <label class="field-label">Max occupanti totali</label>
         <input type="number" id="maxOccupanti" value="20" class="val-right" style="text-align:right;max-width:60px">
       </div>
@@ -457,6 +461,12 @@ select.val-right { max-width: 160px; }
         <label class="field-label">Collegamento verticale</label>
         <input type="text" id="collegamento" value="scala protetta e ascensore inserito in vano protetto">
       </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Piani dell'edificio</div>
+      <div id="pianiList"></div>
+      <button class="btn-add" onclick="addPiano()">＋ Aggiungi piano</button>
     </div>
   </div>
 
@@ -486,8 +496,12 @@ select.val-right { max-width: 160px; }
       </div>
     </div>
 
-    <div class="card">
-      <div class="card-title">Attività secondaria</div>
+    <!-- ATTIVITÀ SECONDARIA — removibile -->
+    <div id="attSecCard" class="card">
+      <div class="item-card-header" style="background:none;border-bottom:1px solid var(--border);padding:10px 16px;">
+        <span style="font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;">Attività secondaria</span>
+        <button class="btn-del-sm" onclick="toggleAttSec(false)">Rimuovi</button>
+      </div>
       <div class="form-row row-h">
         <label class="field-label">Numero</label>
         <input type="text" id="attSecNum" value="74.1.A" class="val-right" style="text-align:right;max-width:80px">
@@ -505,24 +519,22 @@ select.val-right { max-width: 160px; }
         <textarea id="attSecDesc" rows="3">Impianti per la produzione di calore alimentati a combustibile solido, liquido o gassoso con potenzialità superiore a 116 kW e fino a 350 kW.</textarea>
       </div>
     </div>
+    <div class="card" id="attSecAdd" style="display:none;">
+      <button class="btn-add" onclick="toggleAttSec(true)">＋ Aggiungi attività secondaria</button>
+    </div>
 
     <div class="card">
-      <div class="card-title">Normativa</div>
-      <div class="form-row row-h">
-        <label class="field-label">Codice prevenzione incendi</label>
-        <input type="text" id="codicePI" value="DM 03/08/2015" class="val-right" style="text-align:right">
-      </div>
-      <div class="form-row row-h">
-        <label class="field-label">RTV centrale termica</label>
-        <input type="text" id="rtvCentrale" value="DM 08/11/2019" class="val-right" style="text-align:right">
-      </div>
+      <div class="card-title">Normativa applicabile</div>
+      <div id="normativaList"></div>
+      <button class="btn-add" onclick="addNormativa()">＋ Aggiungi norma</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Classificazione rischio</div>
       <div class="form-row">
-        <label class="field-label">Classificazione rischio</label>
         <div class="toggle-group" id="toggleRischio">
           <button class="tog" onclick="tog(this,'toggleRischio')">BASSO</button>
           <button class="tog on" onclick="tog(this,'toggleRischio')">NON BASSO</button>
-          <button class="tog" onclick="tog(this,'toggleRischio')">MEDIO</button>
-          <button class="tog" onclick="tog(this,'toggleRischio')">ALTO</button>
         </div>
       </div>
     </div>
@@ -866,7 +878,24 @@ let forni = [
   { desc:"Prese tappate (n.2)", comb:"gas", kw:5 },
 ];
 
-let pericoli = [
+let piani = [
+  { nome:"Seminterrato", sup:0, desc:"Locale antincendio con gruppo di pompaggio" },
+  { nome:"Piano terra", sup:410, desc:"Reception e 3 compartimenti deposito (attività soggetta 70.1.B)" },
+  { nome:"Piano primo", sup:0, desc:"Locale forni — attività soggetta 74.1.A" },
+  { nome:"Piano secondo", sup:328, desc:"Laboratorio, deposito e uffici" },
+  { nome:"Piano terzo", sup:0, desc:"Attualmente allo stato grezzo — futuro alloggio custode" },
+];
+
+let normative = [
+  { desc:"Codice prevenzione incendi", ref:"DM 03/08/2015" },
+  { desc:"Regola tecnica verticale centrale termica", ref:"DM 08/11/2019" },
+  { desc:"Gestione sicurezza antincendio (mini codice)", ref:"DM 02/09/2021" },
+  { desc:"Sicurezza nei luoghi di lavoro", ref:"D.Lgs. 81/2008" },
+];
+
+let attSecVisible = true;
+
+
   "Malfunzionamento di impianti elettrici",
   "Malfunzionamento di impianto di ricarica elettrica del carrello elevatore",
   "Malfunzionamento di impianti di cottura e bollitura",
@@ -959,7 +988,77 @@ function tog(el, groupId) {
 }
 
 // ============================================================
-// COMPARTIMENTI
+// PIANI
+// ============================================================
+function renderPiani() {
+  const c = document.getElementById('pianiList');
+  c.innerHTML = piani.map((p, i) => `
+    <div class="item-card" style="margin-bottom:10px;">
+      <div class="item-card-header">
+        <span>Piano ${i+1}</span>
+        <button class="btn-del-sm" onclick="removePiano(${i})">Rimuovi</button>
+      </div>
+      <div class="form-row">
+        <label class="field-label">Nome piano</label>
+        <input type="text" value="${p.nome}" onchange="piani[${i}].nome=this.value">
+      </div>
+      <div class="form-row row-h">
+        <label class="field-label">Superficie (m²)</label>
+        <input type="number" value="${p.sup}" class="val-right" style="text-align:right;max-width:80px" onchange="piani[${i}].sup=parseFloat(this.value)||0">
+      </div>
+      <div class="form-row">
+        <label class="field-label">Descrizione</label>
+        <input type="text" value="${p.desc}" onchange="piani[${i}].desc=this.value">
+      </div>
+    </div>`).join('');
+}
+
+function addPiano() {
+  piani.push({ nome:"Nuovo piano", sup:0, desc:"" });
+  renderPiani();
+}
+
+function removePiano(i) {
+  piani.splice(i,1);
+  renderPiani();
+}
+
+// ============================================================
+// NORMATIVA
+// ============================================================
+function renderNormativa() {
+  const c = document.getElementById('normativaList');
+  c.innerHTML = normative.map((n, i) => `
+    <div class="repeater-item" style="flex-direction:column;align-items:stretch;gap:6px;">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input type="text" value="${n.desc}" placeholder="Descrizione norma" style="flex:1;font-size:14px;" onchange="normative[${i}].desc=this.value">
+        <button class="btn-del" onclick="removeNormativa(${i})">✕</button>
+      </div>
+      <input type="text" value="${n.ref}" placeholder="Riferimento (es. DM 03/08/2015)" style="font-size:13px;color:var(--muted);" onchange="normative[${i}].ref=this.value">
+    </div>`).join('');
+}
+
+function addNormativa() {
+  normative.push({ desc:"Nuova norma", ref:"" });
+  renderNormativa();
+}
+
+function removeNormativa(i) {
+  normative.splice(i,1);
+  renderNormativa();
+}
+
+// ============================================================
+// ATTIVITÀ SECONDARIA toggle
+// ============================================================
+function toggleAttSec(show) {
+  attSecVisible = show;
+  document.getElementById('attSecCard').style.display = show ? 'block' : 'none';
+  document.getElementById('attSecAdd').style.display = show ? 'none' : 'block';
+}
+
+// ============================================================
+// PERICOLI
 // ============================================================
 function renderCompartimenti() {
   const c = document.getElementById('compList');
@@ -1114,6 +1213,8 @@ function renderRvita() {
 document.addEventListener('DOMContentLoaded', () => {
   buildTabs();
   updateArrows();
+  renderPiani();
+  renderNormativa();
   renderCompartimenti();
   renderForni();
   renderList(pericoli, 'pericoliList');
@@ -1198,6 +1299,27 @@ function buildDocx(secs){
 
   for(const s of secs){
     if(s.spacer){body+=`<w:p><w:pPr><w:spacing w:before="60" w:after="60"/></w:pPr></w:p>`;continue;}
+
+    // INDICE ROW: {toc: true, num: '1.', title: '...', indent: false}
+    if(s.toc){
+      const isH2=s.indent;
+      const leftInd=isH2?720:0;
+      // Tab stop a destra per il numero di pagina (9026 = larghezza testo)
+      body+=`<w:p>
+        <w:pPr>
+          <w:spacing w:before="${isH2?40:80}" w:after="${isH2?40:80}"/>
+          <w:ind w:left="${leftInd}"/>
+          <w:tabs>
+            <w:tab w:val="right" w:leader="dot" w:pos="9026"/>
+          </w:tabs>
+        </w:pPr>
+        <w:r><w:rPr><w:rFonts w:ascii="Arial" w:hAnsi="Arial"/><w:sz w:val="24"/><w:u w:val="single"/></w:rPr>
+          <w:t xml:space="preserve">${xe(s.num)} ${xe(s.title)}</w:t>
+        </w:r>
+      </w:p>`;
+      continue;
+    }
+
     if(s.tableRows){
       const cw=s.tw||s.tableRows[0].map(()=>Math.floor(9026/s.tableRows[0].length));
       body+=`<w:tbl><w:tblPr><w:tblW w:w="${cw.reduce((a,b)=>a+b,0)}" w:type="dxa"/><w:tblBorders><w:top w:val="single" w:sz="4" w:color="AAAAAA"/><w:left w:val="single" w:sz="4" w:color="AAAAAA"/><w:bottom w:val="single" w:sz="4" w:color="AAAAAA"/><w:right w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideH w:val="single" w:sz="4" w:color="AAAAAA"/><w:insideV w:val="single" w:sz="4" w:color="AAAAAA"/></w:tblBorders></w:tblPr><w:tblGrid>${cw.map(w=>`<w:gridCol w:w="${w}"/>`).join('')}</w:tblGrid>`;
@@ -1268,10 +1390,13 @@ async function generateDoc(){
       tipoAttivita:val('tipoAttivita'),comune:val('comune'),provincia:val('provincia'),
       indirizzo:val('indirizzo'),motivazione:val('motivazione'),
       tipoEdificio:val('tipoEdificio'),apertoAlPubblico:val('apertoAlPubblico'),
+      supTotale:val('supTotale'),
       maxOccupanti:val('maxOccupanti'),collegamento:val('collegamento'),
       attPrincNum:val('attPrincNum'),attPrincDesc:val('attPrincDesc'),attPrincPiano:val('attPrincPiano'),
-      attSecNum:val('attSecNum'),attSecDesc:val('attSecDesc'),attSecPiano:val('attSecPiano'),
-      potenzaTotale:val('potenzaTotale'),codicePI:val('codicePI'),rtvCentrale:val('rtvCentrale'),
+      attSecNum:attSecVisible?val('attSecNum'):'',
+      attSecDesc:attSecVisible?val('attSecDesc'):'',
+      attSecPiano:attSecVisible?val('attSecPiano'):'',
+      potenzaTotale:attSecVisible?val('potenzaTotale'):'',
       classificazioneRischio:document.querySelector('#toggleRischio .on')?.textContent||'NON BASSO',
       reiPareti:val('reiPareti'),reiSoffitti:val('reiSoffitti'),reiPorte:val('reiPorte'),
       dotazionePorte:val('dotazionePorte'),carrello:val('carrello'),altroMezzo:val('altroMezzo'),
@@ -1288,6 +1413,9 @@ async function generateDoc(){
       estintore2:val('estintore2'),distanzaEstintori:val('distanzaEstintori'),
       misureAggiuntive:val('misureAggiuntive'),
       deltaOcc:val('deltaOcc').split(' ')[0],
+      normativaDesc: normative.map(n=>`${n.desc}: ${n.ref}`).join('; '),
+      codicePI: normative[0]?.ref || 'DM 03/08/2015',
+      rtvCentrale: normative[1]?.ref || 'DM 08/11/2019',
     };
 
     const fd=forni.map(f=>`${f.desc} da ${f.kw} kW`).join(', ');
@@ -1305,6 +1433,44 @@ async function generateDoc(){
       runs([{t:'VALUTAZIONE DEL RISCHIO CON METODO DESCRITTIVO',b:true,u:true}]),
       sp(),sp(),
 
+      // ---- INDICE ----
+      {runs:[{t:'Indice',b:true}]},
+      sp(),
+      {toc:true, num:'1.', title:'PREMESSA'},
+      {toc:true, num:'2.', title:'Allegato A - Valutazione del rischio incendio'},
+      ...(attSecVisible?[
+        {toc:true, num:'', title:`Attivita n. ${v.attPrincNum}`, indent:true},
+        {toc:true, num:'', title:`Attivita n. ${v.attSecNum}`, indent:true},
+      ]:[
+        {toc:true, num:'', title:`Attivita n. ${v.attPrincNum}`, indent:true},
+      ]),
+      {toc:true, num:'2.1.', title:`Valutazione del rischio d'incendio. Metodo Descrittivo.`, indent:true},
+      {toc:true, num:'2.2.', title:`Individuazione dei pericoli d'incendio`, indent:true},
+      {toc:true, num:'2.3.', title:'Individuazione delle sorgenti di innesco', indent:true},
+      {toc:true, num:'2.4.', title:'Individuazione dei materiali combustibili o infiammabili', indent:true},
+      {toc:true, num:'2.5.', title:'Carico di incendio', indent:true},
+      {toc:true, num:'2.6.', title:'Interazione inneschi-combustibili', indent:true},
+      {toc:true, num:'2.7.', title:'Eventuali quantitativi rilevanti di sostanze pericolose', indent:true},
+      {toc:true, num:'2.8.', title:`Lavorazioni pericolose ai fini dell'incendio o dell'esplosione`, indent:true},
+      {toc:true, num:'2.9.', title:'Possibile formazione di atmosfere esplosive', indent:true},
+      {toc:true, num:'3.', title:`Descrizione del contesto e dell'ambiente nei quali i pericoli sono inseriti`},
+      {toc:true, num:'3.1.', title:'Accessibilita e viabilita', indent:true},
+      {toc:true, num:'3.2.', title:'Layout aziendale', indent:true},
+      {toc:true, num:'3.3.', title:'Distanziamenti e compartimentazioni', indent:true},
+      {toc:true, num:'3.4.', title:'Ventilazione e smaltimento dei fumi', indent:true},
+      {toc:true, num:'3.5.', title:`Determinazione di quantita e tipologia degli occupanti esposti al rischio d'incendio`, indent:true},
+      {toc:true, num:'4.', title:`Individuazione dei beni esposti al rischio d'incendio`},
+      {toc:true, num:'5.', title:`Valutazione qualitativa o quantitativa delle conseguenze dell'incendio su occupanti, beni e ambiente`},
+      {toc:true, num:'5.1.', title:'Sugli occupanti', indent:true},
+      {toc:true, num:'5.2.', title:'Sui beni', indent:true},
+      {toc:true, num:'5.3.', title:`Sull'ambiente`, indent:true},
+      {toc:true, num:'6.', title:'Individuazione delle misure preventive che possano rimuovere o ridurre i pericoli che determinano rischi significativi'},
+      {toc:true, num:'7.', title:'Valutazione del rischio residuo di incendio'},
+      {toc:true, num:'8.', title:'Profilo di rischio Rvita (tabb. da G.3-1 a G.3-4)'},
+      {toc:true, num:'9.', title:'Valutazione del Profilo di Rischio Rvita'},
+      sp(),sp(),
+      // ---- FINE INDICE ----
+
       h1('1. PREMESSA'),
       p(`La presente valutazione del rischio incendio analizza le "più severe ma credibili ipotesi d'incendio" e le conseguenti ripercussioni su occupanti, beni e ambiente.`),
       sp(),
@@ -1316,24 +1482,29 @@ async function generateDoc(){
       sp(),
       runs([{t:`Attività Principale ${v.attPrincNum}: `,b:true},{t:v.attPrincDesc}]),
       sp(),
-      runs([{t:`Attività soggetta N. ${v.attSecNum}: `,b:true},{t:`${v.attSecDesc} Saranno presenti ${fd} per un totale di ${v.potenzaTotale} kW.`}]),
-      sp(),
+      ...(attSecVisible ? [
+        runs([{t:`Attività soggetta N. ${v.attSecNum}: `,b:true},{t:`${v.attSecDesc} Saranno presenti ${fd} per un totale di ${v.potenzaTotale} kW.`}]),
+        sp(),
+      ] : []),
       p(`Le mutate condizioni richiedono la procedura di esame progetto da parte del Comando VVF di ${v.comune}.`),
 
       h1('2. Allegato A - Valutazione del rischio incendio'),
       p(`La presente valutazione costituisce parte integrante del DVR di cui all'art. 17, comma 1, lett. a), D.Lgs. n. 81/2008.`),
       sp(),
       p(`Attivita n. ${v.attPrincNum}: ${v.attPrincDesc}`,{b:true}),
-      p(`Attivita n. ${v.attSecNum}: ${v.attSecDesc}`),
+      ...(attSecVisible ? [p(`Attivita n. ${v.attSecNum}: ${v.attSecDesc}`)] : []),
+      sp(),
+      p('Normativa applicabile:',{b:true}),
+      ...normative.map(n=>bul(`${n.desc}: ${n.ref}`)),
 
       h2(`2.1. Valutazione del rischio d'incendio. Metodo Descrittivo.`),
-      p(`L'attivita soggetta principale ${v.attPrincNum} e localizzata al ${v.attPrincPiano}. L'attivita di produzione ${v.attSecNum} si svolge al ${v.attSecPiano} dove sono presenti ${fd}.`),
+      p(`L'attivita soggetta principale ${v.attPrincNum} e localizzata al ${v.attPrincPiano}.${attSecVisible?' L\'attivita di produzione '+v.attSecNum+' si svolge al '+v.attSecPiano+' dove sono presenti '+fd+'.':''}`),
       sp(),
-      p(`L'edificio ${v.apertoAlPubblico==='no'?'non e aperto al pubblico':'e aperto al pubblico'} e presenta i seguenti piani collegati da ${v.collegamento}:`),
+      p(`L'edificio ${v.apertoAlPubblico==='no'?'non e aperto al pubblico':'e aperto al pubblico'}${v.supTotale>0?', ha una superficie totale di '+v.supTotale+' m²,':''} e presenta i seguenti piani collegati da ${v.collegamento}:`),
       sp(),
-      ...compartimenti.map(c=>bul(`${c.piano} - ${c.nome}${c.sup>0?` (${c.sup} m2)`:''}, max ${c.occ} occupanti`)),
+      ...piani.map(piano=>bul(`${piano.nome}${piano.sup>0?' ('+piano.sup+' m²)':''}: ${piano.desc}`)),
       sp(),
-      runs([{t:'Il rischio e classificato '},{t:v.classificazioneRischio,b:true},{t:`. Si applica ${v.codicePI} e la RTV ${v.rtvCentrale} per la centrale termica.`}]),
+      runs([{t:'Il rischio e classificato '},{t:v.classificazioneRischio,b:true},{t:`. Si applicano le normative: ${normative.map(n=>n.ref).join(', ')}.`}]),
       sp(),
       p(`Il numero complessivo di occupanti nell'intero edificio sara al massimo di ${v.maxOccupanti} persone.`),
 
@@ -1363,7 +1534,7 @@ async function generateDoc(){
       h2('2.6. Interazione inneschi-combustibili'),
       p('Le interazioni sono limitate da:'),sp(),
       bul('Compartimentazione del locale forni rispetto a depositi e uffici'),
-      bul(`Misure di sicurezza RTV ${v.rtvCentrale} nel locale forni`),
+      bul(`Misure di sicurezza secondo ${normative.map(n=>n.ref).join(', ')} nel locale forni`),
       bul('Procedure operative per uso sicuro delle apparecchiature'),
       bul('Formazione e informazione del personale'),
 
