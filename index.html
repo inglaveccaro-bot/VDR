@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🫒 Ehi, Ma'</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f5f0e8;color:#2a2010;min-height:100vh}
+
+.info-bar{background:#2d3a1e;color:#a0b080;text-align:center;font-size:12px;padding:10px}
+
+header{background:#2d3a1e;padding:14px 20px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:22px;font-weight:900;color:#c8a84b;letter-spacing:-0.5px}
+header p{font-size:11px;color:#a0b080;margin-top:2px}
+
+.cart-btn{position:relative;background:#c8a84b;color:#2d3a1e;border:none;border-radius:16px;padding:10px 18px;font-weight:900;font-size:22px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 3px 12px rgba(200,168,75,.5)}
+.cart-btn:active{opacity:.8}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:#e63946;color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;border:2px solid #2d3a1e;display:none}
+.cart-badge.visible{display:flex}
+
+/* CATEGORY TABS */
+.cat-nav{background:#fff;border-bottom:2px solid #e0d8c8;position:sticky;top:57px;z-index:90;overflow:hidden}
+.cat-tabs{display:flex;overflow-x:auto;padding:0}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{flex-shrink:0;padding:13px 18px;border:none;background:none;color:#8b7a5a;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+.cat-tab.active{color:#2d3a1e;border-bottom-color:#c8a84b}
+
+/* PAGES */
+.page{display:none;padding:16px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+.page-title{font-size:20px;font-weight:900;color:#2d3a1e;margin-bottom:4px}
+.page-sub{font-size:12px;color:#8b7a5a;margin-bottom:16px}
+
+.item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.item-info{flex:1;padding-right:12px}
+.item-name{font-size:14px;font-weight:700;color:#2a2010}
+.item-desc{font-size:11px;color:#8b7a5a;margin-top:2px;line-height:1.4}
+.item-badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;margin-top:4px}
+.badge-new{background:#c8a84b22;color:#a0782a}
+.item-price{font-size:15px;font-weight:800;color:#c8a84b;flex-shrink:0;margin-right:10px}
+.qty-ctrl{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qty-btn{width:30px;height:30px;border-radius:50%;border:none;background:#2d3a1e;color:#c8a84b;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty-btn:active{opacity:.7}
+.qty-num{font-size:15px;font-weight:800;min-width:18px;text-align:center;color:#2a2010}
+
+.loading{text-align:center;padding:60px 20px;color:#8b7a5a}
+.spinner{font-size:36px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:#fee;border:1px solid #fcc;border-radius:12px;padding:16px;margin:20px;color:#c00;font-size:14px;line-height:1.6}
+
+/* CART MODAL */
+#cart-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55)}
+#cart-modal.open{display:flex;align-items:flex-end}
+.cart-sheet{background:#fff;border-radius:22px 22px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:22px}
+.cart-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cart-header h2{font-size:20px;font-weight:900;color:#2d3a1e}
+.close-btn{background:#f0e8d8;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:#6b5a3a;display:flex;align-items:center;justify-content:center}
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8}
+.ci-name{font-size:14px;color:#2a2010;font-weight:600}
+.ci-qty{font-size:12px;color:#8b7a5a;margin-top:2px}
+.ci-tot{font-weight:800;color:#c8a84b;font-size:14px}
+.cart-total-row{display:flex;justify-content:space-between;padding:16px 0 0;font-size:17px;font-weight:900}
+.cart-total-row span:last-child{color:#c8a84b;font-size:20px}
+.empty-cart{text-align:center;padding:30px;color:#8b7a5a;font-size:14px}
+
+.field{margin:14px 0 0}
+.field label{font-size:13px;font-weight:700;color:#2d3a1e;display:block;margin-bottom:6px}
+.field input,.field textarea{width:100%;padding:11px 14px;border:2px solid #e0d8c8;border-radius:12px;font-size:14px;outline:none;font-family:inherit;background:#faf8f4}
+.field input:focus,.field textarea:focus{border-color:#c8a84b}
+.field textarea{resize:none;height:70px}
+
+.wa-btn{width:100%;margin-top:18px;padding:15px;background:#25D366;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(37,211,102,.35)}
+.wa-btn:active{opacity:.85}
+</style>
+</head>
+<body>
+
+<div class="info-bar">🕐 Colazione 7:30–10:00 &nbsp;|&nbsp; Pranzo 12:00–14:00 &nbsp;|&nbsp; Cena 18:30–22:30</div>
+
+<header>
+  <div>
+    <h1>Ehi, Ma'</h1>
+    <p>Area Sosta Camper – Alberobello</p>
+  </div>
+  <button class="cart-btn" onclick="openCart()">
+    🛒
+    <span style="font-size:14px;font-weight:900" id="cart-label">Carrello</span>
+    <span class="cart-badge" id="cart-badge">0</span>
+  </button>
+</header>
+
+<div class="cat-nav"><div class="cat-tabs" id="cat-tabs"></div></div>
+<div id="pages"><div class="page active loading-page"><div class="loading"><div class="spinner">⏳</div><br>Caricamento menù...</div></div></div>
+
+<div id="cart-modal" onclick="closeOutside(event)">
+  <div class="cart-sheet">
+    <div class="cart-header"><h2>🛒 Il tuo ordine</h2><button class="close-btn" onclick="closeCart()">✕</button></div>
+    <div id="cart-items"></div>
+    <div class="field"><label>📍 Numero piazzola / targa camper</label><input id="camper-num" type="text" placeholder="Es. Piazzola 12 o AB123CD"></div>
+    <div class="field"><label>🕐 Quando vuoi ricevere l'ordine?</label>
+      <select id="slot-field" style="width:100%;padding:11px 14px;border:2px solid #e0d8c8;border-radius:12px;font-size:14px;outline:none;font-family:inherit;background:#faf8f4;color:#2a2010;appearance:none">
+        <option value="">— Seleziona orario —</option>
+        <optgroup label="☕ Colazione (domani mattina)">
+          <option value="Domani 07:30">Domani 07:30</option>
+          <option value="Domani 08:00">Domani 08:00</option>
+          <option value="Domani 08:30">Domani 08:30</option>
+          <option value="Domani 09:00">Domani 09:00</option>
+          <option value="Domani 09:30">Domani 09:30</option>
+        </optgroup>
+        <optgroup label="🥗 Pranzo (oggi)">
+          <option value="Oggi 12:00">Oggi 12:00</option>
+          <option value="Oggi 12:30">Oggi 12:30</option>
+          <option value="Oggi 13:00">Oggi 13:00</option>
+          <option value="Oggi 13:30">Oggi 13:30</option>
+        </optgroup>
+        <optgroup label="🍷 Cena (stasera)">
+          <option value="Stasera 18:30">Stasera 18:30</option>
+          <option value="Stasera 19:00">Stasera 19:00</option>
+          <option value="Stasera 19:30">Stasera 19:30</option>
+          <option value="Stasera 20:00">Stasera 20:00</option>
+          <option value="Stasera 20:30">Stasera 20:30</option>
+          <option value="Stasera 21:00">Stasera 21:00</option>
+          <option value="Stasera 21:30">Stasera 21:30</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="field"><label>📝 Note (allergie, preferenze…)</label><textarea id="note-field" placeholder="Es. senza glutine, ben cotto…"></textarea></div>
+    <button class="wa-btn" onclick="sendWA()">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Invia ordine su WhatsApp
+    </button>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://xieetkuzpfumchhpgmen.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Yk8kzYtGy-TCVk8vX1vOTg_6_7U0rZU";
+const WA_NUMBER    = "393406707398";
+
+let menuData = [];
+let cart = {};
+let activePage = 0;
+
+const fmt = n => "€" + n.toFixed(2).replace(".", ",");
+
+async function loadMenu() {
+  try {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/menu_items?select=*&order=categoria.asc,sort_order.asc`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` } }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    const map = {};
+    rows.forEach(r => {
+      if (!map[r.categoria]) map[r.categoria] = [];
+      map[r.categoria].push(r);
+    });
+    menuData = Object.entries(map).map(([cat, items]) => ({ cat, items }));
+    buildUI();
+  } catch(e) {
+    document.getElementById('pages').innerHTML =
+      `<div class="error-box">⚠️ Impossibile caricare il menù.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function buildUI() {
+  const tabsEl = document.getElementById('cat-tabs');
+  const pagesEl = document.getElementById('pages');
+  tabsEl.innerHTML = '';
+  pagesEl.innerHTML = '';
+
+  menuData.forEach((c, i) => {
+    // Tab
+    const tab = document.createElement('button');
+    tab.className = 'cat-tab' + (i === 0 ? ' active' : '');
+    tab.textContent = c.cat;
+    tab.onclick = () => switchPage(i);
+    tabsEl.appendChild(tab);
+
+    // Page
+    const page = document.createElement('div');
+    page.className = 'page' + (i === 0 ? ' active' : '');
+    page.id = 'page-' + i;
+
+    const emoji = c.cat.split(' ')[0];
+    const name = c.cat.split(' ').slice(1).join(' ');
+    page.innerHTML = `<div class="page-title">${emoji} ${name}</div>
+      <div class="page-sub">${c.items.filter(x=>x.available).length} voci disponibili</div>`;
+
+    c.items.forEach(item => {
+      if (!item.available) return;
+      const d = document.createElement('div');
+      d.className = 'item';
+      let badgeHtml = '';
+      if (item.badge === 'new') badgeHtml = '<span class="item-badge badge-new">✨ Novità</span>';
+      d.innerHTML = `
+        <div class="item-info">
+          <div class="item-name">${item.name}</div>
+          ${item.description ? `<div class="item-desc">${item.description}</div>` : ''}
+          ${badgeHtml}
+        </div>
+        <div class="item-price">${fmt(item.price)}</div>
+        <div class="qty-ctrl">
+          <button class="qty-btn" onclick="chg(${item.id},-1)">−</button>
+          <span class="qty-num" id="q${item.id}">0</span>
+          <button class="qty-btn" onclick="chg(${item.id},1)">+</button>
+        </div>`;
+      page.appendChild(d);
+    });
+    pagesEl.appendChild(page);
+  });
+}
+
+function switchPage(i) {
+  activePage = i;
+  document.querySelectorAll('.cat-tab').forEach((t, j) => t.classList.toggle('active', j === i));
+  document.querySelectorAll('.page').forEach((p, j) => p.classList.toggle('active', j === i));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function chg(id, delta) {
+  cart[id] = Math.max(0, (cart[id] || 0) + delta);
+  if (!cart[id]) delete cart[id];
+  const el = document.getElementById('q' + id);
+  if (el) el.textContent = cart[id] || 0;
+  updateCartBtn();
+}
+
+function updateCartBtn() {
+  const tot = Object.values(cart).reduce((a, b) => a + b, 0);
+  const badge = document.getElementById('cart-badge');
+  const label = document.getElementById('cart-label');
+  badge.textContent = tot;
+  badge.classList.toggle('visible', tot > 0);
+  label.textContent = tot > 0 ? `(${tot})` : 'Carrello';
+}
+
+function openCart() { renderCart(); document.getElementById('cart-modal').classList.add('open'); }
+function closeCart() { document.getElementById('cart-modal').classList.remove('open'); }
+function closeOutside(e) { if (e.target === document.getElementById('cart-modal')) closeCart(); }
+
+function renderCart() {
+  const el = document.getElementById('cart-items');
+  const ids = Object.keys(cart);
+  if (!ids.length) { el.innerHTML = '<div class="empty-cart">🛒 Carrello vuoto<br><small>Aggiungi qualcosa dal menù!</small></div>'; return; }
+  const allItems = menuData.flatMap(c => c.items);
+  let html = '', total = 0;
+  ids.forEach(id => {
+    const item = allItems.find(x => x.id == id);
+    const qty = cart[id], sub = item.price * qty;
+    total += sub;
+    html += `<div class="cart-item">
+      <div><div class="ci-name">${item.name}</div><div class="ci-qty">x${qty} × ${fmt(item.price)}</div></div>
+      <div class="ci-tot">${fmt(sub)}</div></div>`;
+  });
+  html += `<div class="cart-total-row"><span>Totale</span><span>${fmt(total)}</span></div>`;
+  el.innerHTML = html;
+}
+
+function sendWA() {
+  const ids = Object.keys(cart);
+  if (!ids.length) { alert('Aggiungi almeno un prodotto!'); return; }
+  const camper = document.getElementById('camper-num').value.trim();
+  const slot = document.getElementById('slot-field').value;
+  const note = document.getElementById('note-field').value.trim();
+  if (!slot) { alert('Seleziona un orario di consegna!'); return; }
+  const allItems = menuData.flatMap(c => c.items);
+  let msg = "🫒 *Nuovo ordine – Ehi, Ma'*\n\n";
+  if (camper) msg += `📍 *Piazzola/Camper:* ${camper}\n`;
+  msg += `🕐 *Orario:* ${slot}\n\n`;
+  let total = 0;
+  msg += "*Ordine:*\n";
+  ids.forEach(id => {
+    const item = allItems.find(x => x.id == id);
+    const qty = cart[id], sub = item.price * qty;
+    total += sub;
+    msg += `• ${item.name} x${qty} → ${fmt(sub)}\n`;
+  });
+  msg += `\n💶 *Totale: ${fmt(total)}*`;
+  if (note) msg += `\n\n📝 *Note:* ${note}`;
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+loadMenu();
+</script>
+</body>
+</html>
