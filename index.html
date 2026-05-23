@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🫒 Ehi, Ma'</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f5f0e8;color:#2a2010;min-height:100vh}
+
+.info-bar{background:#2d3a1e;color:#a0b080;text-align:center;font-size:12px;padding:10px}
+header{background:#2d3a1e;padding:14px 20px;position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;gap:10px}
+header h1{font-size:22px;font-weight:900;color:#c8a84b;letter-spacing:-0.5px}
+header p{font-size:11px;color:#a0b080;margin-top:2px}
+.header-right{display:flex;align-items:center;gap:10px;flex-shrink:0}
+
+/* LANG TOGGLE */
+.lang-toggle{display:flex;background:#1a2410;border-radius:20px;padding:3px;gap:2px}
+.lang-btn{padding:5px 11px;border-radius:16px;border:none;cursor:pointer;font-size:12px;font-weight:800;transition:all .2s;background:none;color:#a0b080}
+.lang-btn.active{background:#c8a84b;color:#2d3a1e}
+
+.cart-btn{position:relative;background:#c8a84b;color:#2d3a1e;border:none;border-radius:16px;padding:10px 14px;font-weight:900;font-size:18px;cursor:pointer;display:flex;align-items:center;gap:6px;box-shadow:0 3px 12px rgba(200,168,75,.5)}
+.cart-badge{position:absolute;top:-8px;right:-8px;background:#e63946;color:#fff;border-radius:50%;width:26px;height:26px;display:none;align-items:center;justify-content:center;font-size:13px;font-weight:900;border:2px solid #2d3a1e}
+.cart-badge.visible{display:flex}
+
+.cat-nav{background:#fff;border-bottom:2px solid #e0d8c8;position:sticky;top:57px;z-index:90}
+.cat-tabs{display:flex;overflow-x:auto;padding:0}
+.cat-tabs::-webkit-scrollbar{display:none}
+.cat-tab{flex-shrink:0;padding:13px 18px;border:none;background:none;color:#8b7a5a;font-weight:700;font-size:13px;cursor:pointer;border-bottom:3px solid transparent;transition:all .2s;white-space:nowrap}
+.cat-tab.active{color:#2d3a1e;border-bottom-color:#c8a84b}
+
+.page{display:none;padding:16px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+.page-title{font-size:20px;font-weight:900;color:#2d3a1e;margin-bottom:4px}
+.page-sub{font-size:12px;color:#8b7a5a;margin-bottom:16px}
+
+.item{background:#fff;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.item-info{flex:1;padding-right:12px}
+.item-name{font-size:14px;font-weight:700;color:#2a2010}
+.item-desc{font-size:11px;color:#8b7a5a;margin-top:2px;line-height:1.4}
+.item-price{font-size:15px;font-weight:800;color:#c8a84b;flex-shrink:0;margin-right:10px}
+.qty-ctrl{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.qty-btn{width:30px;height:30px;border-radius:50%;border:none;background:#2d3a1e;color:#c8a84b;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.qty-num{font-size:15px;font-weight:800;min-width:18px;text-align:center}
+
+.loading{text-align:center;padding:60px 20px;color:#8b7a5a}
+.spinner{font-size:36px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:#fee;border:1px solid #fcc;border-radius:12px;padding:16px;margin:20px;color:#c00;font-size:14px;line-height:1.6}
+
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55)}
+.modal.open{display:flex;align-items:flex-end}
+.sheet{background:#fff;border-radius:22px 22px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding:22px}
+.sheet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.sheet-header h2{font-size:20px;font-weight:900;color:#2d3a1e}
+.close-btn{background:#f0e8d8;border:none;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;color:#6b5a3a;display:flex;align-items:center;justify-content:center}
+
+.cart-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f0e8d8}
+.ci-name{font-size:14px;color:#2a2010;font-weight:600}
+.ci-qty{font-size:12px;color:#8b7a5a;margin-top:2px}
+.ci-tot{font-weight:800;color:#c8a84b;font-size:14px}
+.cart-total-row{display:flex;justify-content:space-between;padding:16px 0 0;font-size:17px;font-weight:900}
+.cart-total-row span:last-child{color:#c8a84b;font-size:20px}
+.empty-cart{text-align:center;padding:30px;color:#8b7a5a;font-size:14px}
+
+.field{margin:14px 0 0}
+.field label{font-size:13px;font-weight:700;color:#2d3a1e;display:block;margin-bottom:6px}
+.field input,.field textarea,.field select{width:100%;padding:11px 14px;border:2px solid #e0d8c8;border-radius:12px;font-size:14px;outline:none;font-family:inherit;background:#faf8f4;color:#2a2010;-webkit-appearance:none;appearance:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#c8a84b}
+.field textarea{resize:none;height:70px}
+
+.pay-btn{width:100%;margin-top:18px;padding:15px;background:#2d3a1e;color:#c8a84b;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 4px 14px rgba(45,58,30,.3)}
+
+.pay-methods{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.pay-method{padding:14px;border:2px solid #e0d8c8;border-radius:14px;background:#fff;cursor:pointer;text-align:center;transition:all .2s}
+.pay-method.selected{border-color:#c8a84b;background:#fffbf0}
+.pm-icon{font-size:28px;margin-bottom:6px}
+.pm-name{font-size:13px;font-weight:700;color:#2d3a1e}
+.pm-sub{font-size:11px;color:#8b7a5a;margin-top:2px}
+
+.card-form{background:#f5f0e8;border-radius:14px;padding:16px;margin-bottom:14px}
+.cf-title{font-size:12px;font-weight:700;color:#8b7a5a;text-transform:uppercase;letter-spacing:1px;margin-bottom:12px}
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cf-input{width:100%;padding:10px 12px;border:2px solid #e0d8c8;border-radius:10px;font-size:14px;font-family:inherit;background:#fff;outline:none}
+.cf-input:focus{border-color:#c8a84b}
+
+.test-cards{background:#e8f4e8;border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:#2d5a2d;line-height:1.8}
+
+.pay-total{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-top:1px solid #e0d8c8;border-bottom:1px solid #e0d8c8;margin-bottom:14px}
+.pay-total span:first-child{font-size:14px;color:#8b7a5a}
+.pay-total span:last-child{font-size:22px;font-weight:900;color:#2d3a1e}
+
+.confirm-pay-btn{width:100%;padding:15px;background:#c8a84b;color:#2d3a1e;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.confirm-pay-btn:disabled{opacity:.5;cursor:default}
+
+.processing{text-align:center;padding:30px 20px}
+.proc-spinner{font-size:48px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:16px}
+.proc-title{font-size:18px;font-weight:800;color:#2d3a1e;margin-bottom:8px}
+.proc-sub{font-size:13px;color:#8b7a5a}
+
+.success-screen{text-align:center;padding:20px}
+.success-icon{font-size:64px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:900;color:#2d3a1e;margin-bottom:8px}
+.success-sub{font-size:14px;color:#8b7a5a;line-height:1.6;margin-bottom:20px}
+.success-detail{background:#f5f0e8;border-radius:14px;padding:16px;text-align:left;margin-bottom:16px;font-size:13px;line-height:1.9;color:#2a2010}
+.sim-note{background:#e8f4e8;border-radius:12px;padding:12px;font-size:12px;color:#2d5a2d;margin-bottom:16px;text-align:left}
+.wa-btn{width:100%;padding:15px;background:#25D366;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
+.sim-badge{display:inline-block;background:#f59e0b22;color:#b45309;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;margin-left:8px}
+</style>
+</head>
+<body>
+
+<div class="info-bar" id="info-bar">🕐 Colazione 7:30–10:00 &nbsp;|&nbsp; Pranzo 12:00–14:00 &nbsp;|&nbsp; Cena 18:30–22:30</div>
+
+<header>
+  <div>
+    <h1>Ehi, Ma'</h1>
+    <p id="header-sub">Area Sosta Camper – Alberobello</p>
+  </div>
+  <div class="header-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('it')">🇮🇹 ITA</button>
+      <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+    </div>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 <span class="cart-badge" id="cart-badge">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="cat-nav"><div class="cat-tabs" id="cat-tabs"></div></div>
+<div id="pages"><div class="page active"><div class="loading"><div class="spinner">⏳</div><br>Caricamento menù...</div></div></div>
+
+<!-- CART MODAL -->
+<div class="modal" id="cart-modal" onclick="closeOutside(event,'cart-modal')">
+  <div class="sheet">
+    <div class="sheet-header">
+      <h2 id="cart-title">🛒 Il tuo ordine</h2>
+      <button class="close-btn" onclick="closeModal('cart-modal')">✕</button>
+    </div>
+    <div id="cart-items"></div>
+    <div class="field"><label id="lbl-email">📧 Email (per conferma ordine)</label><input id="email-field" type="email" placeholder="mario.rossi@email.com"></div>
+    <div class="field"><label id="lbl-piazzola">📍 Numero piazzola / targa camper</label><input id="camper-num" type="text" placeholder="Es. Piazzola 12 o AB123CD"></div>
+    <div class="field"><label id="lbl-orario">🕐 Quando vuoi ricevere l'ordine?</label>
+      <select id="slot-field">
+        <option value="" id="slot-placeholder">— Seleziona orario —</option>
+        <optgroup id="og-col" label="☕ Colazione (domani mattina)">
+          <option>Domani 07:30</option><option>Domani 08:00</option>
+          <option>Domani 08:30</option><option>Domani 09:00</option><option>Domani 09:30</option>
+        </optgroup>
+        <optgroup id="og-pra" label="🥗 Pranzo (oggi)">
+          <option>Oggi 12:00</option><option>Oggi 12:30</option>
+          <option>Oggi 13:00</option><option>Oggi 13:30</option>
+        </optgroup>
+        <optgroup id="og-cen" label="🍷 Cena (stasera)">
+          <option>Stasera 18:30</option><option>Stasera 19:00</option><option>Stasera 19:30</option>
+          <option>Stasera 20:00</option><option>Stasera 20:30</option><option>Stasera 21:00</option><option>Stasera 21:30</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="field"><label id="lbl-note">📝 Note (allergie, preferenze…)</label><textarea id="note-field" placeholder="Es. senza glutine, ben cotto…"></textarea></div>
+    <button class="pay-btn" onclick="goToPayment()" id="btn-pay">💳 Procedi al pagamento</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal" id="pay-modal" onclick="closeOutside(event,'pay-modal')">
+  <div class="sheet" id="pay-sheet"></div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://xieetkuzpfumchhpgmen.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Yk8kzYtGy-TCVk8vX1vOTg_6_7U0rZU";
+const WA_NUMBER    = "393406707398";
+
+let lang = 'it';
+let menuData = [], cart = {}, selMethod = null, orderData = null;
+const fmt = n => "€" + n.toFixed(2).replace(".", ",");
+const delay = ms => new Promise(r => setTimeout(r, ms));
+const cartTotal = () => {
+  const all = menuData.flatMap(c => c.items);
+  return Object.entries(cart).reduce((s,[id,q]) => s + (all.find(x=>x.id==id)?.price||0)*q, 0);
+};
+
+// ── TRANSLATIONS ─────────────────────────────
+const T = {
+  it: {
+    infoBar: "🕐 Colazione 7:30–10:00 &nbsp;|&nbsp; Pranzo 12:00–14:00 &nbsp;|&nbsp; Cena 18:30–22:30",
+    headerSub: "Area Sosta Camper – Alberobello",
+    cartTitle: "🛒 Il tuo ordine",
+    lblEmail: "📧 Email (per conferma ordine)",
+    lblPiazzola: "📍 Numero piazzola / targa camper",
+    lblOrario: "🕐 Quando vuoi ricevere l'ordine?",
+    lblNote: "📝 Note (allergie, preferenze…)",
+    slotPlaceholder: "— Seleziona orario —",
+    ogCol: "☕ Colazione (domani mattina)",
+    ogPra: "🥗 Pranzo (oggi)",
+    ogCen: "🍷 Cena (stasera)",
+    slotCol: ["Domani 07:30","Domani 08:00","Domani 08:30","Domani 09:00","Domani 09:30"],
+    slotPra: ["Oggi 12:00","Oggi 12:30","Oggi 13:00","Oggi 13:30"],
+    slotCen: ["Stasera 18:30","Stasera 19:00","Stasera 19:30","Stasera 20:00","Stasera 20:30","Stasera 21:00","Stasera 21:30"],
+    btnPay: "💳 Procedi al pagamento",
+    emptyCart: "🛒 Carrello vuoto",
+    totalLabel: "Totale",
+    availLabel: "voci disponibili",
+    payTitle: "💳 Pagamento",
+    testCardsTitle: "🧪 Carte di test:",
+    testCardsOk: "✅ Successo:",
+    testCardsKo: "❌ Rifiutata:",
+    testCardsHint: "Scadenza: qualsiasi data futura | CVV: qualsiasi 3 cifre",
+    methods: {card:"Carta",apple:"Apple Pay",google:"Google Pay",cash:"Contanti"},
+    methodsSub: {card:"Credito / Debito",apple:"Touch / Face ID",google:"Android",cash:"Alla consegna"},
+    cardFormTitle: "Dati carta",
+    cfNum: "1234 5678 9012 3456", cfExp: "MM/AA", cfCvv: "CVV", cfName: "Nome sul titolare",
+    btnConfirm: "🔒 Paga ",
+    btnConfirmSel: "Seleziona metodo",
+    cashNote: "Pagherai in contanti al momento della consegna. Tieni pronti ",
+    procPay: "Pagamento in corso…", procPaySub: "Non chiudere questa pagina",
+    procSave: "Salvataggio ordine…", procSaveSub: "Registrazione su database",
+    procEmail: "Invio conferma email…",
+    declinedTitle: "Carta rifiutata", declinedSub: "Il pagamento non è andato a buon fine.\nProva con un'altra carta.",
+    retryBtn: "← Riprova",
+    successTitle: "Ordine confermato!",
+    successSub: "Pagamento ricevuto e ordine salvato.\nAbbiamo inviato una conferma a",
+    detailPiazzola: "Piazzola", detailOrario: "Orario", detailPagamento: "Pagamento", detailEmail: "Email", detailOrdine: "Ordine",
+    simNote1: "💾 Ordine salvato su database [SIMULAZIONE]",
+    waBtn: "Scrivi anche su WhatsApp (opzionale)",
+    alertProduct: "Aggiungi almeno un prodotto!",
+    alertEmail: "Inserisci un'email valida!",
+    alertSlot: "Seleziona un orario!",
+    alertCard: "Inserisci un numero di carta valido (16 cifre)",
+    alertExp: "Inserisci una data di scadenza valida",
+    alertCvv: "Inserisci il CVV",
+    waMsg: "🫒 *Nuovo ordine – Ehi, Ma'*",
+    waPiazzola: "📍 *Piazzola/Camper:*",
+    waOrario: "🕐 *Orario:*",
+    waPagamento: "💳 *Pagamento:*",
+    waOrdine: "*Ordine:*",
+    waTotale: "💶 *Totale:*",
+    waNote: "📝 *Note:*",
+  },
+  en: {
+    infoBar: "🕐 Breakfast 7:30–10:00 &nbsp;|&nbsp; Lunch 12:00–14:00 &nbsp;|&nbsp; Dinner 18:30–22:30",
+    headerSub: "Camper Stop – Alberobello",
+    cartTitle: "🛒 Your order",
+    lblEmail: "📧 Email (for order confirmation)",
+    lblPiazzola: "📍 Pitch number / camper plate",
+    lblOrario: "🕐 When do you want your order?",
+    lblNote: "📝 Notes (allergies, preferences…)",
+    slotPlaceholder: "— Select time —",
+    ogCol: "☕ Breakfast (tomorrow morning)",
+    ogPra: "🥗 Lunch (today)",
+    ogCen: "🍷 Dinner (tonight)",
+    slotCol: ["Tomorrow 07:30","Tomorrow 08:00","Tomorrow 08:30","Tomorrow 09:00","Tomorrow 09:30"],
+    slotPra: ["Today 12:00","Today 12:30","Today 13:00","Today 13:30"],
+    slotCen: ["Tonight 18:30","Tonight 19:00","Tonight 19:30","Tonight 20:00","Tonight 20:30","Tonight 21:00","Tonight 21:30"],
+    btnPay: "💳 Proceed to payment",
+    emptyCart: "🛒 Your cart is empty",
+    totalLabel: "Total",
+    availLabel: "items available",
+    payTitle: "💳 Payment",
+    testCardsTitle: "🧪 Test cards:",
+    testCardsOk: "✅ Success:",
+    testCardsKo: "❌ Declined:",
+    testCardsHint: "Expiry: any future date | CVV: any 3 digits",
+    methods: {card:"Card",apple:"Apple Pay",google:"Google Pay",cash:"Cash"},
+    methodsSub: {card:"Credit / Debit",apple:"Touch / Face ID",google:"Android",cash:"Pay on delivery"},
+    cardFormTitle: "Card details",
+    cfNum: "1234 5678 9012 3456", cfExp: "MM/YY", cfCvv: "CVV", cfName: "Cardholder name",
+    btnConfirm: "🔒 Pay ",
+    btnConfirmSel: "Select a method",
+    cashNote: "You will pay cash on delivery. Please have ",
+    procPay: "Processing payment…", procPaySub: "Please don't close this page",
+    procSave: "Saving order…", procSaveSub: "Saving to database",
+    procEmail: "Sending confirmation email…",
+    declinedTitle: "Card declined", declinedSub: "The payment was not successful.\nPlease try another card.",
+    retryBtn: "← Try again",
+    successTitle: "Order confirmed!",
+    successSub: "Payment received and order saved.\nWe sent a confirmation to",
+    detailPiazzola: "Pitch", detailOrario: "Time", detailPagamento: "Payment", detailEmail: "Email", detailOrdine: "Order",
+    simNote1: "💾 Order saved to database [SIMULATION]",
+    waBtn: "Also write on WhatsApp (optional)",
+    alertProduct: "Add at least one product!",
+    alertEmail: "Please enter a valid email!",
+    alertSlot: "Please select a time!",
+    alertCard: "Please enter a valid card number (16 digits)",
+    alertExp: "Please enter a valid expiry date",
+    alertCvv: "Please enter the CVV",
+    waMsg: "🫒 *New order – Ehi, Ma'*",
+    waPiazzola: "📍 *Pitch/Camper:*",
+    waOrario: "🕐 *Time:*",
+    waPagamento: "💳 *Payment:*",
+    waOrdine: "*Order:*",
+    waTotale: "💶 *Total:*",
+    waNote: "📝 *Notes:*",
+  }
+};
+
+function t(key) { return T[lang][key] || key; }
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.includes(l.toUpperCase())));
+  applyTranslations();
+  buildUI();
+}
+
+function applyTranslations() {
+  document.getElementById('info-bar').innerHTML = t('infoBar');
+  document.getElementById('header-sub').textContent = t('headerSub');
+  document.getElementById('cart-title').textContent = t('cartTitle');
+  document.getElementById('lbl-email').textContent = t('lblEmail');
+  document.getElementById('lbl-piazzola').textContent = t('lblPiazzola');
+  document.getElementById('lbl-orario').textContent = t('lblOrario');
+  document.getElementById('lbl-note').textContent = t('lblNote');
+  document.getElementById('btn-pay').textContent = t('btnPay');
+  document.getElementById('slot-placeholder').textContent = t('slotPlaceholder');
+  document.getElementById('og-col').label = t('ogCol');
+  document.getElementById('og-pra').label = t('ogPra');
+  document.getElementById('og-cen').label = t('ogCen');
+  // rebuild slot options
+  const slotField = document.getElementById('slot-field');
+  const groups = slotField.querySelectorAll('optgroup');
+  [t('slotCol'), t('slotPra'), t('slotCen')].forEach((slots, gi) => {
+    const opts = groups[gi].querySelectorAll('option');
+    slots.forEach((s, i) => { if(opts[i]) opts[i].textContent = s; });
+  });
+}
+
+// ── Load menu ───────────────────────────────
+async function loadMenu() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/menu_items?select=*&order=categoria.asc,sort_order.asc`,
+      {headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    // Placeholder immagini per simulazione (da sostituire con Supabase Storage)
+    const placeholders = {
+      'Caffè espresso': 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&q=80',
+      'Cappuccino': 'https://images.unsplash.com/photo-1534778101976-62847782c213?w=600&q=80',
+      'Pasticciotto leccese': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&q=80',
+      'Granita di mandorla con briosce': 'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=600&q=80',
+      'Frisella pomodoro e olio EVO': 'https://images.unsplash.com/photo-1623428187969-5da2dcea5ebf?w=600&q=80',
+      'Puccia capocollo e stracciatella': 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=600&q=80',
+      'Puccia polpo e rucola': 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600&q=80',
+      'Panino bombette di Cisternino': 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
+      'Insalata farro, pomodori e tonno': 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=80',
+      'Focaccia barese': 'https://images.unsplash.com/photo-1585478259715-876acc5be8eb?w=600&q=80',
+      'Tagliere salumi pugliesi': 'https://images.unsplash.com/photo-1544025162-d76594f0b0f6?w=600&q=80',
+      'Tagliere formaggi': 'https://images.unsplash.com/photo-1452195100486-9cc805987862?w=600&q=80',
+      'Tagliere misto terra': 'https://images.unsplash.com/photo-1626200419199-391ae4be7a41?w=600&q=80',
+      'Burrata fresca': 'https://images.unsplash.com/photo-1600628421055-4d30de868b8f?w=600&q=80',
+      'Crostini nduja e ricotta forte': 'https://images.unsplash.com/photo-1572695157366-5e585ab2b69f?w=600&q=80',
+      'Olive leccesi marinate': 'https://images.unsplash.com/photo-1587734195342-9562b9db1640?w=600&q=80',
+      'Orecchiette cime di rapa': 'https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?w=600&q=80',
+      'Orecchiette ragù braciole': 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&q=80',
+      'Fave e cicoria': 'https://images.unsplash.com/photo-1547592166-23ac45744acd?w=600&q=80',
+      'Bombette di Cisternino (3 pz)': 'https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=600&q=80',
+      'Parmigiana di melanzane': 'https://images.unsplash.com/photo-1625938144755-652e08e359b7?w=600&q=80',
+      'Polpo alla brace': 'https://images.unsplash.com/photo-1599487488170-d11ec9c172f0?w=600&q=80',
+      'Tiella riso, patate e cozze': 'https://images.unsplash.com/photo-1519984388953-d2406bc725e1?w=600&q=80',
+      'Primitivo di Manduria DOC': 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=80',
+      'Fiano Minutolo': 'https://images.unsplash.com/photo-1558346547-4439467bd1d5?w=600&q=80',
+      'Negroamaro rosato': 'https://images.unsplash.com/photo-1553361371-9b22f78e8b1d?w=600&q=80',
+      'Bottiglia Primitivo': 'https://images.unsplash.com/photo-1506377247377-2a5b3b417ebb?w=600&q=80',
+      'Birra artigianale pugliese': 'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=600&q=80',
+      'Limonata artigianale': 'https://images.unsplash.com/photo-1523677011781-c91d1bbe2f9e?w=600&q=80',
+      'Acqua 1L': 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=600&q=80',
+      'Cartellate con vincotto': 'https://images.unsplash.com/photo-1467308174912-e9b7d6b7d30b?w=600&q=80',
+      'Pasticciotto caldo': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?w=600&q=80',
+      'Semifreddo al torrone di Bari': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&q=80',
+      'Fichi secchi mandorlati': 'https://images.unsplash.com/photo-1601379329542-31c59347e2b8?w=600&q=80',
+      'Sorbetto al limone': 'https://images.unsplash.com/photo-1488900128323-21503983a07e?w=600&q=80',
+    };
+    rows.forEach(r => { 
+      if(!r.image_url) r.image_url = placeholders[r.name] || null; 
+    });
+    const map = {};
+    rows.forEach(r => { if(!map[r.categoria]) map[r.categoria]=[]; map[r.categoria].push(r); });
+    menuData = Object.entries(map).map(([cat,items])=>({cat,items}));
+    buildUI();
+  } catch(e) {
+    document.getElementById('pages').innerHTML =
+      `<div class="error-box">⚠️ ${lang==='it'?'Impossibile caricare il menù':'Unable to load the menu'}.<br><small>${e.message}</small></div>`;
+  }
+}
+
+function buildUI() {
+  const tabs = document.getElementById('cat-tabs');
+  const pages = document.getElementById('pages');
+  tabs.innerHTML = ''; pages.innerHTML = '';
+  menuData.forEach((c, i) => {
+    const tab = document.createElement('button');
+    tab.className = 'cat-tab'+(i===0?' active':'');
+    tab.textContent = c.cat;
+    tab.onclick = () => switchPage(i);
+    tabs.appendChild(tab);
+    const page = document.createElement('div');
+    page.className = 'page'+(i===0?' active':'');
+    page.id = 'page-'+i;
+    const [emoji,...rest] = c.cat.split(' ');
+    const avail = c.items.filter(x=>x.available).length;
+    page.innerHTML = `<div class="page-title">${emoji} ${rest.join(' ')}</div>
+      <div class="page-sub">${avail} ${t('availLabel')}</div>`;
+    c.items.filter(x=>x.available).forEach(item => {
+      const d = document.createElement('div');
+      d.className = 'item';
+      const desc = lang === 'en' && item.description_en ? item.description_en : item.description;
+      const name = lang === 'en' && item.name_en ? item.name_en : item.name;
+      if (item.image_url) {
+        // Card con immagine grande sopra
+        d.style.cssText = 'flex-direction:column;align-items:stretch;padding:0;overflow:hidden';
+        d.innerHTML = `
+          <div style="width:100%;height:180px;overflow:hidden;border-radius:14px 14px 0 0;background:#e8e0d0">
+            <img src="${item.image_url}" alt="${name}" 
+              style="width:100%;height:100%;object-fit:cover;display:block"
+              onerror="this.parentElement.style.display='none'">
+          </div>
+          <div style="padding:14px 16px;display:flex;justify-content:space-between;align-items:center">
+            <div class="item-info">
+              <div class="item-name">${name}</div>
+              ${desc?`<div class="item-desc">${desc}</div>`:''}
+            </div>
+            <div class="item-price">${fmt(item.price)}</div>
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="chg(${item.id},-1)">−</button>
+              <span class="qty-num" id="q${item.id}">${cart[item.id]||0}</span>
+              <button class="qty-btn" onclick="chg(${item.id},1)">+</button>
+            </div>
+          </div>`;
+      } else {
+        // Card standard senza immagine
+        d.innerHTML = `<div class="item-info">
+            <div class="item-name">${name}</div>
+            ${desc?`<div class="item-desc">${desc}</div>`:''}
+          </div>
+          <div class="item-price">${fmt(item.price)}</div>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="chg(${item.id},-1)">−</button>
+            <span class="qty-num" id="q${item.id}">${cart[item.id]||0}</span>
+            <button class="qty-btn" onclick="chg(${item.id},1)">+</button>
+          </div>`;
+      }
+      page.appendChild(d);
+    });
+    pages.appendChild(page);
+  });
+}
+
+function switchPage(i) {
+  document.querySelectorAll('.cat-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',j===i));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function chg(id, delta) {
+  cart[id] = Math.max(0,(cart[id]||0)+delta);
+  if (!cart[id]) delete cart[id];
+  const el = document.getElementById('q'+id);
+  if (el) el.textContent = cart[id]||0;
+  const tot = Object.values(cart).reduce((a,b)=>a+b,0);
+  const badge = document.getElementById('cart-badge');
+  badge.textContent = tot;
+  badge.classList.toggle('visible', tot>0);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeOutside(e,id) { if(e.target===document.getElementById(id)) closeModal(id); }
+
+function openCart() {
+  const all = menuData.flatMap(c=>c.items);
+  const ids = Object.keys(cart);
+  const el = document.getElementById('cart-items');
+  if (!ids.length) { el.innerHTML=`<div class="empty-cart">${t('emptyCart')}</div>`; openModal('cart-modal'); return; }
+  let html='', total=0;
+  ids.forEach(id => {
+    const item=all.find(x=>x.id==id), qty=cart[id], sub=item.price*qty;
+    total+=sub;
+    const name = lang==='en'&&item.name_en?item.name_en:item.name;
+    html+=`<div class="cart-item"><div><div class="ci-name">${name}</div><div class="ci-qty">x${qty} × ${fmt(item.price)}</div></div><div class="ci-tot">${fmt(sub)}</div></div>`;
+  });
+  html+=`<div class="cart-total-row"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>`;
+  el.innerHTML=html;
+  openModal('cart-modal');
+}
+
+function goToPayment() {
+  const email = document.getElementById('email-field').value.trim();
+  const slot = document.getElementById('slot-field').value;
+  const camper = document.getElementById('camper-num').value.trim();
+  if (!Object.keys(cart).length) { alert(t('alertProduct')); return; }
+  if (!email||!email.includes('@')) { alert(t('alertEmail')); return; }
+  if (!slot) { alert(t('alertSlot')); return; }
+  orderData = {email, slot, camper, note: document.getElementById('note-field').value.trim()};
+  closeModal('cart-modal');
+  showPaymentSheet();
+  openModal('pay-modal');
+}
+
+function showPaymentSheet() {
+  selMethod = null;
+  const total = cartTotal();
+  document.getElementById('pay-sheet').innerHTML = `
+    <div class="sheet-header"><h2>${t('payTitle')} <span class="sim-badge">SIMULAZIONE</span></h2><button class="close-btn" onclick="closeModal('pay-modal')">✕</button></div>
+    <div class="test-cards"><strong>${t('testCardsTitle')}</strong><br>
+      ${t('testCardsOk')} <strong>4242 4242 4242 4242</strong><br>
+      ${t('testCardsKo')} <strong>4000 0000 0000 0002</strong><br>
+      ${t('testCardsHint')}
+    </div>
+    <div class="pay-methods">
+      <div class="pay-method" onclick="selPayMethod('card',this)"><div class="pm-icon">💳</div><div class="pm-name">${t('methods').card}</div><div class="pm-sub">${t('methodsSub').card}</div></div>
+      <div class="pay-method" onclick="selPayMethod('apple',this)"><div class="pm-icon"></div><div class="pm-name">${t('methods').apple}</div><div class="pm-sub">${t('methodsSub').apple}</div></div>
+      <div class="pay-method" onclick="selPayMethod('google',this)"><div class="pm-icon" style="font-weight:900;font-size:22px;color:#4285F4">G</div><div class="pm-name">${t('methods').google}</div><div class="pm-sub">${t('methodsSub').google}</div></div>
+      <div class="pay-method" onclick="selPayMethod('cash',this)"><div class="pm-icon">💵</div><div class="pm-name">${t('methods').cash}</div><div class="pm-sub">${t('methodsSub').cash}</div></div>
+    </div>
+    <div id="card-form-area"></div>
+    <div class="pay-total"><span>${t('totalLabel')}</span><span>${fmt(total)}</span></div>
+    <button class="confirm-pay-btn" id="confirm-btn" onclick="processPayment()" disabled>${t('btnConfirmSel')}</button>`;
+}
+
+function selPayMethod(method, el) {
+  selMethod = method;
+  document.querySelectorAll('.pay-method').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+  const area = document.getElementById('card-form-area');
+  const btn = document.getElementById('confirm-btn');
+  const tr = T[lang];
+  if (method==='card') {
+    area.innerHTML = `<div class="card-form">
+      <div class="cf-title">${tr.cardFormTitle}</div>
+      <div style="display:grid;gap:10px">
+        <input class="cf-input" id="cf-num" placeholder="${tr.cfNum}" maxlength="19" oninput="fmtCard(this)">
+        <div class="card-row">
+          <input class="cf-input" id="cf-exp" placeholder="${tr.cfExp}" maxlength="5" oninput="fmtExp(this)">
+          <input class="cf-input" id="cf-cvv" placeholder="${tr.cfCvv}" maxlength="3" type="password">
+        </div>
+        <input class="cf-input" id="cf-name" placeholder="${tr.cfName}">
+      </div></div>`;
+    btn.disabled=false; btn.textContent=tr.btnConfirm+fmt(cartTotal());
+  } else if (method==='apple') {
+    area.innerHTML=''; btn.disabled=false; btn.innerHTML=` ${tr.methods.apple}`;
+  } else if (method==='google') {
+    area.innerHTML=''; btn.disabled=false; btn.innerHTML=`<span style="font-weight:900;font-size:18px;color:#fff">G</span> ${tr.methods.google}`;
+  } else if (method==='cash') {
+    area.innerHTML=`<div style="background:#f5f0e8;border-radius:12px;padding:14px;margin-bottom:14px;font-size:13px;color:#6b5a3a;line-height:1.6">💵 ${tr.cashNote}<strong>${fmt(cartTotal())}</strong>.</div>`;
+    btn.disabled=false; btn.textContent=`✅ ${lang==='it'?'Conferma ordine':'Confirm order'}`;
+  }
+}
+
+function fmtCard(el){let v=el.value.replace(/\D/g,'').substring(0,16);el.value=v.replace(/(.{4})/g,'$1 ').trim();}
+function fmtExp(el){let v=el.value.replace(/\D/g,'');if(v.length>=2)v=v.substring(0,2)+'/'+(lang==='en'?v.substring(2):v.substring(2));el.value=v;}
+
+function processPayment() {
+  if (selMethod==='card') {
+    const num=(document.getElementById('cf-num')?.value||'').replace(/\s/g,'');
+    if(num.length<16){alert(t('alertCard'));return;}
+    const exp=document.getElementById('cf-exp')?.value||'';
+    if(exp.length<5){alert(t('alertExp'));return;}
+    const cvv=document.getElementById('cf-cvv')?.value||'';
+    if(cvv.length<3){alert(t('alertCvv'));return;}
+    if(num==='4000000000000002'){showDeclined();return;}
+  }
+  showProcessing();
+}
+
+function showProcessing() {
+  const tr = T[lang];
+  document.getElementById('pay-sheet').innerHTML=`<div class="processing"><div class="proc-spinner">⏳</div><div class="proc-title">${tr.procPay}</div><div class="proc-sub">${tr.procPaySub}</div></div>`;
+  delay(2000).then(()=>{
+    document.getElementById('pay-sheet').innerHTML=`<div class="processing"><div class="proc-spinner">💾</div><div class="proc-title">${tr.procSave}</div><div class="proc-sub">${tr.procSaveSub}</div></div>`;
+    return delay(1200);
+  }).then(()=>{
+    document.getElementById('pay-sheet').innerHTML=`<div class="processing"><div class="proc-spinner">📧</div><div class="proc-title">${tr.procEmail}</div><div class="proc-sub">${orderData.email}</div></div>`;
+    return delay(1200);
+  }).then(()=>showSuccess());
+}
+
+function showDeclined() {
+  const tr = T[lang];
+  document.getElementById('pay-sheet').innerHTML=`<div class="processing">
+    <div style="font-size:48px;margin-bottom:16px">❌</div>
+    <div class="proc-title" style="color:#dc2626">${tr.declinedTitle}</div>
+    <div class="proc-sub" style="margin-bottom:20px">${tr.declinedSub}</div>
+    <button class="confirm-pay-btn" onclick="showPaymentSheet()" style="background:#2d3a1e;color:#c8a84b">${tr.retryBtn}</button>
+  </div>`;
+}
+
+function showSuccess() {
+  const tr = T[lang];
+  const all = menuData.flatMap(c=>c.items);
+  let lines='', total=0;
+  Object.entries(cart).forEach(([id,qty])=>{
+    const item=all.find(x=>x.id==id);
+    if(!item) return;
+    const name=lang==='en'&&item.name_en?item.name_en:item.name;
+    const sub=item.price*qty; total+=sub;
+    lines+=`• ${name} x${qty} — ${fmt(sub)}\n`;
+  });
+  const methodLabel = tr.methods[selMethod]||'';
+  document.getElementById('pay-sheet').innerHTML=`
+    <div class="success-screen">
+      <div class="success-icon">✅</div>
+      <div class="success-title">${tr.successTitle}</div>
+      <div class="success-sub">${tr.successSub} <strong>${orderData.email}</strong></div>
+      <div class="success-detail">
+        📍 <strong>${tr.detailPiazzola}:</strong> ${orderData.camper||'—'}<br>
+        🕐 <strong>${tr.detailOrario}:</strong> ${orderData.slot}<br>
+        💳 <strong>${tr.detailPagamento}:</strong> ${methodLabel} ✅<br>
+        📧 <strong>${tr.detailEmail}:</strong> ${orderData.email}<br><br>
+        <strong>${tr.detailOrdine}:</strong><br>${lines.trim()}<br><br>
+        💶 <strong>${tr.totalLabel}:</strong> ${fmt(total)}
+      </div>
+      <div class="sim-note">${tr.simNote1}<br>📧 Email → ${orderData.email} [${lang==='it'?'SIMULAZIONE':'SIMULATION'}]</div>
+      <button class="wa-btn" onclick="sendWA('${methodLabel}','${fmt(total)}')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        ${tr.waBtn}
+      </button>
+    </div>`;
+  cart={};
+  document.getElementById('cart-badge').classList.remove('visible');
+  menuData.flatMap(c=>c.items).forEach(item=>{const el=document.getElementById('q'+item.id);if(el)el.textContent='0';});
+}
+
+function sendWA(method, totalStr) {
+  const tr = T[lang];
+  const all = menuData.flatMap(c=>c.items);
+  let msg=`${tr.waMsg}\n\n`;
+  if(orderData.camper) msg+=`${tr.waPiazzola} ${orderData.camper}\n`;
+  msg+=`${tr.waOrario} ${orderData.slot}\n${tr.waPagamento} ${method} ✅\n\n${tr.waOrdine}\n`;
+  Object.entries(cart).forEach(([id,qty])=>{
+    const item=all.find(x=>x.id==id);
+    if(item){const name=lang==='en'&&item.name_en?item.name_en:item.name;msg+=`• ${name} x${qty} → ${fmt(item.price*qty)}\n`;}
+  });
+  msg+=`\n${tr.waTotale} ${totalStr}`;
+  if(orderData.note) msg+=`\n\n${tr.waNote} ${orderData.note}`;
+  window.open(`https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(msg)}`,'_blank');
+  closeModal('pay-modal');
+}
+
+loadMenu();
+</script>
+</body>
+</html>
