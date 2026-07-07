@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🫒 Ehi Ma'</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#EDE7C8;color:#2a2010;min-height:100vh}
+
+.info-bar{background:#115740;color:#a0c8a0;text-align:center;font-size:12px;padding:10px}
+header{background:#115740;padding:10px 16px;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:12px}
+.header-right{display:flex;align-items:center;gap:10px;margin-left:auto;flex-shrink:0}
+
+.lang-toggle{display:flex;background:#0a3328;border-radius:20px;padding:3px;gap:2px}
+.lang-btn{padding:5px 11px;border-radius:16px;border:none;cursor:pointer;font-size:12px;font-weight:800;transition:all .2s;background:none;color:#91c8a8}
+.lang-btn.active{background:#C8A84B;color:#115740}
+
+.cat-nav{background:#fff;border-bottom:2px solid #d0c8a8;position:sticky;top:57px;z-index:90;padding:10px 12px}
+.cat-tabs{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.cat-tab{padding:10px 16px;border:2px solid #EDE7C8;border-radius:20px;background:#faf7ec;color:#6b5a3a;font-weight:700;font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap;display:inline-block;text-decoration:none}
+.cat-tab.active{color:#fff;background:#115740;border-color:#115740}
+
+.page{display:none;padding:16px;max-width:600px;margin:0 auto}
+.page.active{display:block}
+.page-title{font-size:20px;font-weight:900;color:#115740;margin-bottom:4px}
+.page-sub{font-size:12px;color:#6b5a3a;margin-bottom:16px}
+
+/* ITEM — solo visualizzazione, niente qty */
+.item{background:#fff;border-radius:14px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.item-img{width:100%;height:180px;object-fit:cover;display:block;background:#e8e0d0}
+.item-body{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.item-info{flex:1;padding-right:12px}
+.item-name{font-size:15px;font-weight:800;color:#115740}
+.item-desc{font-size:12px;color:#6b5a3a;margin-top:3px;line-height:1.5}
+.item-price{font-size:17px;font-weight:900;color:#C8A84B;flex-shrink:0}
+
+/* SUGGERIMENTO DEL MOMENTO */
+.ai-banner{background:#115740;border-radius:16px;padding:16px;margin-bottom:16px;position:relative;overflow:hidden}
+.ai-banner::before{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;background:#00965E;border-radius:50%;opacity:.3}
+.ai-banner-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-banner-icon{font-size:22px}
+.ai-banner-title{font-size:13px;font-weight:800;color:#C8A84B;text-transform:uppercase;letter-spacing:1px}
+.ai-banner-text{font-size:14px;color:#f0f8f0;line-height:1.6}
+
+.loading{text-align:center;padding:60px 20px;color:#6b5a3a}
+.spinner{font-size:36px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.error-box{background:#fee;border:1px solid #fcc;border-radius:12px;padding:16px;margin:20px;color:#c00;font-size:14px;line-height:1.6}
+
+/* coming soon badge */
+.coming-soon{background:#115740;color:#C8A84B;text-align:center;font-size:12px;font-weight:700;padding:8px;letter-spacing:1px}
+
+/* ══════ ADMIN ══════ */
+.admin-gear{background:none;border:none;color:#a0c8a0;opacity:.55;font-size:15px;cursor:pointer;padding:4px;flex-shrink:0}
+.admin-overlay{position:fixed;inset:0;background:rgba(10,20,10,.65);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.admin-overlay.active{display:flex}
+.admin-login-card{background:#fff;border-radius:16px;padding:26px 22px;width:100%;max-width:340px;position:relative}
+.admin-login-card h3{color:#115740;font-size:18px;font-weight:900;margin-bottom:4px}
+.admin-login-card p{font-size:12px;color:#6b5a3a;margin-bottom:18px;line-height:1.5}
+.admin-input{width:100%;padding:12px 13px;border:1px solid #d0c8a8;border-radius:10px;font-size:14px;margin-bottom:10px;background:#EDE7C8;color:#2a2010}
+.admin-btn{width:100%;padding:13px;border:none;border-radius:10px;background:#115740;color:#C8A84B;font-weight:800;font-size:14px;cursor:pointer}
+.admin-btn.secondary{background:#EDE7C8;color:#115740;margin-top:8px}
+.admin-btn:disabled{opacity:.6}
+.admin-error{color:#c00;font-size:12px;margin-bottom:8px;min-height:14px;line-height:1.4;white-space:pre-wrap}
+.admin-close{position:absolute;top:10px;right:12px;font-size:24px;color:#6b5a3a;background:none;border:none;cursor:pointer;line-height:1}
+
+.admin-panel{position:fixed;inset:0;background:#EDE7C8;z-index:999;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.admin-panel.active{display:block}
+.admin-topbar{background:#115740;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;flex-wrap:wrap;gap:8px}
+.admin-topbar h3{color:#C8A84B;font-size:15px;font-weight:900}
+.admin-topbar-actions{display:flex;gap:8px;flex-wrap:wrap}
+.admin-topbar button{border:none;border-radius:8px;padding:7px 11px;font-size:11px;font-weight:700;cursor:pointer}
+.admin-topbar .exit-btn{background:#EDE7C8;color:#115740}
+.admin-topbar .logout-btn{background:#8a2f2f;color:#fff}
+.admin-topbar .test-btn{background:#0a3328;color:#C8A84B}
+.admin-content{padding:16px;max-width:600px;margin:0 auto;padding-bottom:60px}
+.admin-cat-title{font-size:13px;font-weight:800;color:#115740;text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px}
+.admin-item-card{background:#fff;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.admin-photo-row{display:flex;gap:12px;align-items:center;margin-bottom:0}
+.admin-thumb-wrap{position:relative;width:72px;height:72px;flex-shrink:0;border-radius:10px;overflow:hidden;background:#e8e0d0;cursor:pointer}
+.admin-thumb-wrap img{width:100%;height:100%;object-fit:cover;display:block}
+.admin-thumb-wrap .cam-badge{position:absolute;bottom:2px;right:2px;background:#115740;color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.admin-thumb-wrap.uploading::after{content:'⏳';position:absolute;inset:0;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center;font-size:20px}
+.admin-photo-hint{font-size:11px;color:#6b5a3a}
+.admin-field-label{font-size:11px;font-weight:700;color:#6b5a3a;text-transform:uppercase;letter-spacing:.5px;margin:8px 0 3px}
+.admin-input-sm{width:100%;padding:9px 10px;border:1px solid #d0c8a8;border-radius:8px;font-size:13px;background:#faf7ec;color:#2a2010;font-family:inherit}
+textarea.admin-input-sm{resize:vertical;min-height:46px}
+.admin-item-footer{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px}
+.admin-avail-toggle{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:#115740}
+.admin-save-btn{background:#00965E;color:#fff;border:none;border-radius:8px;padding:9px 18px;font-weight:800;font-size:12px;cursor:pointer;flex-shrink:0}
+.admin-save-btn.saved{background:#6b5a3a}
+.admin-loading{text-align:center;padding:60px 20px;color:#6b5a3a}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#115740;color:#fff;padding:11px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:2000;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90%;text-align:center}
+.toast.show{opacity:1}
+
+/* riordino + nuovo prodotto */
+.admin-card-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.admin-reorder{display:flex;gap:4px;flex-shrink:0}
+.admin-reorder button{background:#EDE7C8;border:none;border-radius:6px;width:28px;height:28px;font-size:13px;color:#115740;cursor:pointer;font-weight:700}
+.admin-reorder button:disabled{opacity:.3;cursor:default}
+.admin-add-btn{background:#C8A84B;color:#115740}
+.admin-login-card.wide{max-width:380px;max-height:85vh;overflow-y:auto}
+
+/* diagnostica */
+.diag-overlay{position:fixed;inset:0;background:rgba(10,20,10,.75);z-index:1100;display:none;align-items:center;justify-content:center;padding:16px}
+.diag-overlay.active{display:flex}
+.diag-card{background:#fff;border-radius:16px;padding:22px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto;position:relative}
+.diag-card h3{color:#115740;font-size:16px;font-weight:900;margin-bottom:12px}
+.diag-row{display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #eee;font-size:13px}
+.diag-row:last-child{border-bottom:none}
+.diag-icon{flex-shrink:0;width:20px}
+.diag-label{font-weight:700;color:#2a2010}
+.diag-detail{color:#6b5a3a;font-size:12px;margin-top:2px;white-space:pre-wrap;word-break:break-word}
+</style>
+</head>
+<body>
+
+<div class="info-bar"><span id="info-bar-text">🕐 Colazione 7:30–10:00 &nbsp;|&nbsp; Pranzo 12:00–14:00 &nbsp;|&nbsp; Cena 18:30–22:30</span></div>
+<div class="coming-soon" id="coming-soon-bar">🛒 Ordini online — Disponibili a breve!</div>
+
+<header>
+  <img src="https://xieetkuzpfumchhpgmen.supabase.co/storage/v1/object/public/Menu%20Images/IMG_1832.jpeg"
+    alt="Ehi Ma'" style="width:64px;height:64px;border-radius:50%;object-fit:cover;flex-shrink:0">
+  <div class="header-right">
+    <div class="lang-toggle">
+      <button class="lang-btn active" onclick="setLang('it')">🇮🇹 ITA</button>
+      <button class="lang-btn" onclick="setLang('en')">🇬🇧 EN</button>
+    </div>
+    <button class="admin-gear" onclick="openAdminLogin()" title="Area riservata">⚙️</button>
+  </div>
+</header>
+
+<div class="cat-nav"><div class="cat-tabs" id="cat-tabs"></div></div>
+
+<div id="pages"><div class="page active"><div class="loading"><div class="spinner">⏳</div><br>Caricamento menù...</div></div></div>
+
+<!-- ══════ LOGIN ADMIN ══════ -->
+<div class="admin-overlay" id="admin-login-overlay">
+  <div class="admin-login-card">
+    <button class="admin-close" onclick="closeAdminLogin()">×</button>
+    <h3>🔒 Area riservata</h3>
+    <p>Accesso amministratore per modificare nomi, descrizioni e foto dei prodotti.</p>
+    <div class="admin-error" id="admin-login-error"></div>
+    <input type="email" class="admin-input" id="admin-email" placeholder="Email" autocomplete="username">
+    <input type="password" class="admin-input" id="admin-password" placeholder="Password" autocomplete="current-password">
+    <button class="admin-btn" id="admin-login-btn" onclick="doAdminLogin()">Accedi</button>
+  </div>
+</div>
+
+<!-- ══════ PANNELLO ADMIN ══════ -->
+<div class="admin-panel" id="admin-panel">
+  <div class="admin-topbar">
+    <h3>⚙️ Gestione prodotti</h3>
+    <div class="admin-topbar-actions">
+      <button class="test-btn" onclick="runDiagnostics()">🔧 Test</button>
+      <button class="admin-add-btn" onclick="openCategoriesManager()" style="background:#0a3328;color:#C8A84B">🏷️ Categorie</button>
+      <button class="admin-add-btn" onclick="openNewProductForm()">➕ Nuovo</button>
+      <button class="exit-btn" onclick="closeAdminPanel()">Esci</button>
+      <button class="logout-btn" onclick="doAdminLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="admin-content" id="admin-content">
+    <div class="admin-loading"><div class="spinner">⏳</div><br>Caricamento prodotti...</div>
+  </div>
+</div>
+
+<!-- ══════ NUOVO PRODOTTO ══════ -->
+<div class="admin-overlay" id="admin-new-overlay">
+  <div class="admin-login-card wide">
+    <button class="admin-close" onclick="closeNewProductForm()">×</button>
+    <h3>➕ Nuovo prodotto</h3>
+    <p>Compila i campi e salva: il prodotto apparirà subito nel pannello, potrai aggiungere la foto dopo.</p>
+    <div class="admin-error" id="new-product-error"></div>
+
+    <div class="admin-field-label">Categoria</div>
+    <input class="admin-input" id="new-categoria" list="admin-cat-list" placeholder="Es. 🥪 Panini">
+    <datalist id="admin-cat-list"></datalist>
+    <div class="admin-field-label">Nome categoria (EN) — solo se è una categoria nuova</div>
+    <input class="admin-input" id="new-categoria-en" placeholder="Es. 🥪 Sandwiches">
+
+    <div class="admin-field-label">Nome (IT) *</div>
+    <input class="admin-input" id="new-name" placeholder="Es. Panino con bombette">
+    <div class="admin-field-label">Nome (EN)</div>
+    <input class="admin-input" id="new-name-en" placeholder="Es. Bombette sandwich">
+    <div class="admin-field-label">Prezzo (€) *</div>
+    <input class="admin-input" id="new-price" type="number" step="0.10" min="0" placeholder="Es. 9.00">
+    <div class="admin-field-label">Descrizione (IT)</div>
+    <textarea class="admin-input admin-input-sm" id="new-desc" style="min-height:44px"></textarea>
+    <div class="admin-field-label">Descrizione (EN)</div>
+    <textarea class="admin-input admin-input-sm" id="new-desc-en" style="min-height:44px"></textarea>
+    <label class="admin-avail-toggle" style="margin:8px 0 14px">
+      <input type="checkbox" id="new-available" checked> Disponibile da subito
+    </label>
+    <button class="admin-btn" id="new-product-btn" onclick="createAdminProduct()">Crea prodotto</button>
+  </div>
+</div>
+
+<!-- ══════ GESTIONE CATEGORIE ══════ -->
+<div class="admin-overlay" id="admin-cats-overlay">
+  <div class="admin-login-card wide">
+    <button class="admin-close" onclick="closeCategoriesManager()">×</button>
+    <h3>🏷️ Traduzioni categorie</h3>
+    <p>Scrivi il nome in inglese per ogni categoria e salva. L'app pubblica lo mostrerà quando è selezionata la lingua EN.</p>
+    <div class="admin-error" id="cats-manager-error"></div>
+    <div id="cats-manager-list"><div class="admin-loading"><div class="spinner">⏳</div></div></div>
+    <button class="admin-btn" id="cats-save-btn" onclick="saveCategoryTranslations()" style="margin-top:14px">💾 Salva tutte</button>
+  </div>
+</div>
+
+<!-- ══════ DIAGNOSTICA ══════ -->
+<div class="diag-overlay" id="diag-overlay">
+  <div class="diag-card">
+    <button class="admin-close" onclick="closeDiagnostics()">×</button>
+    <h3>🔧 Diagnostica connessione</h3>
+    <div id="diag-results"><div class="admin-loading"><div class="spinner">⏳</div></div></div>
+  </div>
+</div>
+
+<div class="toast" id="admin-toast"></div>
+
+<!-- input file nascosto per la foto, riusato per ogni prodotto -->
+<input type="file" id="admin-photo-input" accept="image/*" capture="environment" style="display:none">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = "https://xieetkuzpfumchhpgmen.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Yk8kzYtGy-TCVk8vX1vOTg_6_7U0rZU";
+const WA_NUMBER    = "393406707398"; // riattivare con ordini
+const EDGE_URL     = `${SUPABASE_URL}/functions/v1/mypos-checkout`; // riattivare con pagamenti
+const STORAGE_BUCKET = "Menu Images";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let lang = 'it', menuData = [];
+const fmt = n => "€" + n.toFixed(2).replace(".", ",");
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+const T = {
+  it: {
+    infoBar:"🕐 Colazione 7:30–10:00 &nbsp;|&nbsp; Pranzo 12:00–14:00 &nbsp;|&nbsp; Cena 18:30–22:30",
+    comingSoon:"🛒 Ordini online — Disponibili a breve!",
+    availLabel:"voci disponibili",
+    aiTitle:"Consiglio del momento",
+    loadingMenu:"Caricamento menù...",
+    siteTab:"🌐 Sito Web",
+  },
+  en: {
+    infoBar:"🕐 Breakfast 7:30–10:00 &nbsp;|&nbsp; Lunch 12:00–14:00 &nbsp;|&nbsp; Dinner 18:30–22:30",
+    comingSoon:"🛒 Online orders — Coming soon!",
+    availLabel:"items available",
+    aiTitle:"Today's pick",
+    loadingMenu:"Loading menu...",
+    siteTab:"🌐 Website",
+  }
+};
+const t = key => T[lang][key] || key;
+
+// Traduzione dei nomi delle categorie (l'emoji resta invariata).
+// dynamicCategoryEN viene caricata dalla tabella "categories" su Supabase
+// (gestibile dal pannello admin); CATEGORY_EN è un fallback statico di riserva.
+let dynamicCategoryEN = {};
+const CATEGORY_EN = {
+  '☕ Colazione': '☕ Breakfast',
+  '🥪 Pranzo': '🥪 Lunch',
+  '🧀 Taglieri': '🧀 Platters',
+  '🍝 Piatti': '🍝 Mains',
+  '🍷 Vini & Bevande': '🍷 Wine & Drinks',
+  '🍮 Dolci': '🍮 Desserts',
+};
+function translateCat(cat){
+  if(lang!=='en') return cat;
+  return dynamicCategoryEN[cat] || CATEGORY_EN[cat] || cat;
+}
+
+async function loadCategoryTranslations(){
+  try{
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/categories?select=name,name_en`,
+      {headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+    if(!res.ok) return;
+    const rows = await res.json();
+    dynamicCategoryEN = {};
+    rows.forEach(r => { if(r.name_en) dynamicCategoryEN[r.name] = r.name_en; });
+  } catch(e){ /* silenzioso: se la tabella non esiste ancora, si usa solo il fallback statico */ }
+}
+
+function setLang(l) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.textContent.includes(l.toUpperCase())));
+  document.getElementById('info-bar-text').innerHTML = t('infoBar');
+  document.getElementById('coming-soon-bar').textContent = t('comingSoon');
+  buildUI();
+  renderSuggestion();
+}
+
+// ── Placeholder immagini (usate solo se un prodotto non ha ancora una foto propria) ──
+const placeholders = {
+  'Caffè espresso':                  'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=600&q=80',
+  'Cappuccino':                       'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=600&q=80',
+  'Caffè leccese':                    'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=600&q=80',
+  'Granita di mandorla con briosce': 'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&q=80',
+  'Limonata artigianale':            'https://images.unsplash.com/photo-1621263764928-df1444c5e859?w=600&q=80',
+  'Birra artigianale pugliese':      'https://images.unsplash.com/photo-1608270586620-248524c67de9?w=600&q=80',
+  'Acqua 1L':                        'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=600&q=80',
+  'Puccia capocollo e stracciatella':'https://images.unsplash.com/photo-1553909489-cd47e0907980?w=600&q=80',
+  'Puccia polpo e rucola':           'https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&q=80',
+  'Panino bombette di Cisternino':   'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80',
+  'Focaccia barese':                 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&q=80',
+};
+
+// ── Carica menù da Supabase ──────────────────
+async function loadMenu() {
+  await loadCategoryTranslations();
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/menu_items?select=*&order=categoria.asc,sort_order.asc`,
+      {headers:{apikey:SUPABASE_KEY,Authorization:`Bearer ${SUPABASE_KEY}`}});
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const rows = await res.json();
+    rows.forEach(r => { if(!r.image_url) r.image_url = placeholders[r.name] || null; });
+
+    // Mostra TUTTE le categorie presenti nel database, senza filtri
+    const map = {};
+    rows.forEach(r => {
+      if(!map[r.categoria]) map[r.categoria]=[];
+      map[r.categoria].push(r);
+    });
+
+    menuData = Object.entries(map).map(([cat,items])=>({cat,items}));
+    if (menuData.length === 0) menuData = buildFallbackMenu();
+    buildUI();
+    renderSuggestion();
+  } catch(e) {
+    menuData = buildFallbackMenu();
+    buildUI();
+    renderSuggestion();
+  }
+}
+
+function buildFallbackMenu() {
+  return [
+    { cat: '☕ Caffè & Bevande', items: [
+      {id:1,name:'Caffè espresso',name_en:'Espresso',description:null,description_en:null,price:1.50,available:true,image_url:placeholders['Caffè espresso']},
+      {id:2,name:'Cappuccino',name_en:'Cappuccino',description:null,description_en:null,price:2.50,available:true,image_url:placeholders['Cappuccino']},
+      {id:3,name:'Caffè leccese',name_en:'Leccese coffee',description:'Latte di mandorla e ghiaccio',description_en:'Almond milk and ice',price:3.50,available:true,image_url:placeholders['Caffè leccese']},
+      {id:4,name:'Granita di mandorla con briosce',name_en:'Almond granita with brioche',description:null,description_en:null,price:6.00,available:true,image_url:placeholders['Granita di mandorla con briosce']},
+      {id:5,name:'Limonata artigianale',name_en:'Homemade lemonade',description:'Con menta fresca',description_en:'With fresh mint',price:4.00,available:true,image_url:placeholders['Limonata artigianale']},
+      {id:6,name:'Birra artigianale pugliese',name_en:'Craft Apulian beer',description:null,description_en:null,price:5.00,available:true,image_url:placeholders['Birra artigianale pugliese']},
+      {id:7,name:'Acqua 1L',name_en:'Still / sparkling water 1L',description:'Naturale o frizzante',description_en:null,price:2.50,available:true,image_url:placeholders['Acqua 1L']},
+    ]},
+    { cat: '🥪 Panini', items: [
+      {id:8,name:'Puccia capocollo e stracciatella',name_en:'Puccia with capocollo and stracciatella',description:null,description_en:null,price:9.00,available:true,image_url:placeholders['Puccia capocollo e stracciatella']},
+      {id:9,name:'Puccia polpo e rucola',name_en:'Puccia with octopus and rocket',description:null,description_en:null,price:11.00,available:true,image_url:placeholders['Puccia polpo e rucola']},
+      {id:10,name:'Panino bombette di Cisternino',name_en:'Bombette sandwich',description:null,description_en:null,price:10.00,available:true,image_url:placeholders['Panino bombette di Cisternino']},
+      {id:11,name:'Focaccia barese',name_en:'Apulian focaccia',description:'Pomodoro, olive e origano',description_en:'Tomato, olives and oregano',price:6.00,available:true,image_url:placeholders['Focaccia barese']},
+    ]},
+  ];
+}
+
+// ── Costruisce UI ────────────────────────────
+function buildUI() {
+  const tabs = document.getElementById('cat-tabs');
+  const pages = document.getElementById('pages');
+  tabs.innerHTML=''; pages.innerHTML='';
+
+  menuData.forEach((c,i) => {
+    const catLabel = translateCat(c.cat);
+    const tab = document.createElement('button');
+    tab.className='cat-tab'+(i===0?' active':'');
+    tab.textContent=catLabel;
+    tab.onclick=()=>switchPage(i);
+    tabs.appendChild(tab);
+
+    const page = document.createElement('div');
+    page.className='page'+(i===0?' active':'');
+    page.id='page-'+i;
+    const [emoji,...rest]=catLabel.split(' ');
+    const avail=c.items.filter(x=>x.available).length;
+    page.innerHTML=`
+      ${i===0?'<div class="ai-banner" id="ai-banner"></div>':''}
+      <div class="page-title">${emoji} ${rest.join(' ')}</div>
+      <div class="page-sub">${avail} ${t('availLabel')}</div>`;
+
+    c.items.filter(x=>x.available).forEach(item => {
+      const name=lang==='en'&&item.name_en?item.name_en:item.name;
+      const desc=lang==='en'&&item.description_en?item.description_en:item.description;
+      const d=document.createElement('div');
+      d.className='item';
+      d.innerHTML=`
+        ${item.image_url?`<img src="${item.image_url}" alt="${name}" class="item-img" onerror="this.style.display='none'">`:''}
+        <div class="item-body">
+          <div class="item-info">
+            <div class="item-name">${name}</div>
+            ${desc?`<div class="item-desc">${desc}</div>`:''}
+          </div>
+          <div class="item-price">${fmt(item.price)}</div>
+        </div>`;
+      page.appendChild(d);
+    });
+    pages.appendChild(page);
+  });
+
+  // Pulsante di collegamento al sito web esterno
+  const siteLink = document.createElement('a');
+  siteLink.className = 'cat-tab';
+  siteLink.href = 'https://www.ehi-ma.it';
+  siteLink.target = '_blank';
+  siteLink.rel = 'noopener';
+  siteLink.textContent = t('siteTab');
+  tabs.appendChild(siteLink);
+}
+
+function switchPage(i){
+  document.querySelectorAll('.cat-tab').forEach((t,j)=>t.classList.toggle('active',j===i));
+  document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',j===i));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── Suggerimento del momento (client-side, nessuna chiamata esterna) ──
+function getCurrentSlot(){
+  const h=new Date().getHours();
+  if(h>=7&&h<10) return 'colazione';
+  if(h>=12&&h<14) return 'pranzo';
+  return 'cena';
+}
+
+function renderSuggestion(){
+  const bannerEl=document.getElementById('ai-banner');
+  if(!bannerEl) return;
+  const slot=getCurrentSlot();
+  const slotIcon={colazione:'☕',pranzo:'🥪',cena:'🍽️'}[slot];
+  const allAvail=menuData.flatMap(c=>c.items).filter(x=>x.available);
+  if(!allAvail.length){ bannerEl.style.display='none'; return; }
+
+  // sceglie 1-2 prodotti in modo pseudo-casuale ma stabile nell'arco della giornata
+  const seed=new Date().getDate()+new Date().getHours();
+  const picks=[];
+  if(allAvail.length){
+    picks.push(allAvail[seed % allAvail.length]);
+    if(allAvail.length>1) picks.push(allAvail[(seed+7) % allAvail.length]);
+  }
+  const names=[...new Set(picks.map(p=>lang==='en'&&p.name_en?p.name_en:p.name))];
+  const text = lang==='it'
+    ? `Prova ${names.join(' oppure ')}!`
+    : `Try ${names.join(' or ')}!`;
+
+  bannerEl.innerHTML=`
+    <div class="ai-banner-header">
+      <span class="ai-banner-icon">${slotIcon}</span>
+      <span class="ai-banner-title">${t('aiTitle')}</span>
+    </div>
+    <div class="ai-banner-text">${text}</div>`;
+}
+
+/* ═══════════════════════════════════════════════════════
+   AREA ADMIN — login, editing prodotti, upload foto
+   ═══════════════════════════════════════════════════════ */
+let adminItems = [];
+let adminPendingFileId = null;
+
+function showToast(msg){
+  const el = document.getElementById('admin-toast');
+  if(!el) return;
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.classList.remove('show'), 4200);
+}
+
+function openAdminLogin(){
+  document.getElementById('admin-login-error').textContent = '';
+  document.getElementById('admin-email').value = '';
+  document.getElementById('admin-password').value = '';
+  document.getElementById('admin-login-overlay').classList.add('active');
+}
+function closeAdminLogin(){
+  document.getElementById('admin-login-overlay').classList.remove('active');
+}
+
+async function doAdminLogin(){
+  const email = document.getElementById('admin-email').value.trim();
+  const password = document.getElementById('admin-password').value;
+  const errEl = document.getElementById('admin-login-error');
+  const btn = document.getElementById('admin-login-btn');
+  errEl.textContent = '';
+  if(!email || !password){ errEl.textContent = 'Inserisci email e password.'; return; }
+  btn.disabled = true; btn.textContent = 'Accesso...';
+  try{
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if(error) throw error;
+    closeAdminLogin();
+    openAdminPanel();
+  } catch(e){
+    errEl.textContent = 'Credenziali non valide o accesso non autorizzato.\n(' + (e.message||e) + ')';
+  } finally {
+    btn.disabled = false; btn.textContent = 'Accedi';
+  }
+}
+
+async function doAdminLogout(){
+  await sb.auth.signOut();
+  closeAdminPanel();
+  showToast('Disconnesso.');
+}
+
+async function openAdminPanel(){
+  document.getElementById('admin-panel').classList.add('active');
+  await loadAdminItems();
+}
+
+function closeAdminPanel(){
+  document.getElementById('admin-panel').classList.remove('active');
+  if(location.hash === '#admin') history.replaceState(null,'',location.pathname+location.search);
+  loadMenu();
+}
+
+async function loadAdminItems(){
+  const content = document.getElementById('admin-content');
+  content.innerHTML = `<div class="admin-loading"><div class="spinner">⏳</div><br>Caricamento prodotti...</div>`;
+  try{
+    const { data, error } = await sb.from('menu_items').select('*').order('categoria',{ascending:true}).order('sort_order',{ascending:true});
+    if(error) throw error;
+    adminItems = data || [];
+    renderAdminItems();
+  } catch(e){
+    content.innerHTML = `<div class="error-box">⚠️ Errore nel caricamento dei prodotti: ${e.message||e}</div>`;
+  }
+}
+
+function sortAdminItems(){
+  adminItems.sort((a,b)=>{
+    if(a.categoria !== b.categoria) return a.categoria.localeCompare(b.categoria);
+    const sa = a.sort_order ?? 999999, sb2 = b.sort_order ?? 999999;
+    return sa - sb2;
+  });
+}
+
+function renderAdminItems(){
+  const content = document.getElementById('admin-content');
+  if(!adminItems.length){ content.innerHTML = '<div class="admin-loading">Nessun prodotto trovato.</div>'; return; }
+  sortAdminItems();
+  const cats = {};
+  adminItems.forEach(it => { (cats[it.categoria] = cats[it.categoria]||[]).push(it); });
+  const catList = document.getElementById('admin-cat-list');
+  if(catList) catList.innerHTML = Object.keys(cats).map(c=>`<option value="${escAttr(c)}">`).join('');
+  let html = '';
+  Object.entries(cats).forEach(([cat, items]) => {
+    html += `<div class="admin-cat-title">${cat}</div>`;
+    items.forEach((it,idx) => { html += adminItemCardHTML(it, idx, items.length); });
+  });
+  content.innerHTML = html;
+}
+
+function adminItemCardHTML(it, idx, total){
+  const img = it.image_url || 'https://placehold.co/72x72/e8e0d0/6b5a3a?text=%F0%9F%8D%BD';
+  return `
+    <div class="admin-item-card" id="admin-card-${it.id}">
+      <div class="admin-card-top">
+        <div class="admin-photo-row">
+          <div class="admin-thumb-wrap" id="admin-thumbwrap-${it.id}" onclick="pickAdminPhoto(${it.id})">
+            <img src="${img}" id="admin-thumb-${it.id}" alt="">
+            <div class="cam-badge">📷</div>
+          </div>
+          <div class="admin-photo-hint">Tocca la foto per cambiarla<br>(fotocamera o galleria)</div>
+        </div>
+        <div class="admin-reorder">
+          <button onclick="moveAdminItem(${it.id},-1)" ${idx===0?'disabled':''} title="Sposta su">▲</button>
+          <button onclick="moveAdminItem(${it.id},1)" ${idx===total-1?'disabled':''} title="Sposta giù">▼</button>
+        </div>
+      </div>
+
+      <div class="admin-field-label">Nome (IT)</div>
+      <input class="admin-input-sm" id="admin-name-${it.id}" value="${escAttr(it.name||'')}">
+      <div class="admin-field-label">Nome (EN)</div>
+      <input class="admin-input-sm" id="admin-nameen-${it.id}" value="${escAttr(it.name_en||'')}">
+      <div class="admin-field-label">Descrizione (IT)</div>
+      <textarea class="admin-input-sm" id="admin-desc-${it.id}">${escHTML(it.description||'')}</textarea>
+      <div class="admin-field-label">Descrizione (EN)</div>
+      <textarea class="admin-input-sm" id="admin-descen-${it.id}">${escHTML(it.description_en||'')}</textarea>
+
+      <div class="admin-item-footer">
+        <label class="admin-avail-toggle">
+          <input type="checkbox" id="admin-avail-${it.id}" ${it.available?'checked':''}> Disponibile
+        </label>
+        <button class="admin-save-btn" id="admin-save-${it.id}" onclick="saveAdminItem(${it.id})">💾 Salva</button>
+      </div>
+    </div>`;
+}
+
+function escHTML(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+async function moveAdminItem(id, dir){
+  const item = adminItems.find(x=>x.id===id);
+  if(!item) return;
+  const catItems = adminItems.filter(x=>x.categoria===item.categoria);
+  const idx = catItems.indexOf(item);
+  const swapIdx = idx + dir;
+  if(swapIdx < 0 || swapIdx >= catItems.length) return;
+  const other = catItems[swapIdx];
+  const a = item.sort_order ?? idx;
+  const b = other.sort_order ?? swapIdx;
+  item.sort_order = b;
+  other.sort_order = a;
+  try{
+    const [r1, r2] = await Promise.all([
+      sb.from('menu_items').update({ sort_order:item.sort_order }).eq('id', item.id),
+      sb.from('menu_items').update({ sort_order:other.sort_order }).eq('id', other.id)
+    ]);
+    if(r1.error) throw r1.error;
+    if(r2.error) throw r2.error;
+    renderAdminItems();
+    showToast('Ordine aggiornato.');
+  } catch(e){
+    showToast('⚠️ Errore riordino: ' + (e.message||e));
+    await loadAdminItems();
+  }
+}
+
+function openNewProductForm(){
+  document.getElementById('new-product-error').textContent = '';
+  document.getElementById('new-categoria').value = '';
+  document.getElementById('new-categoria-en').value = '';
+  document.getElementById('new-name').value = '';
+  document.getElementById('new-name-en').value = '';
+  document.getElementById('new-price').value = '';
+  document.getElementById('new-desc').value = '';
+  document.getElementById('new-desc-en').value = '';
+  document.getElementById('new-available').checked = true;
+  document.getElementById('admin-new-overlay').classList.add('active');
+}
+function closeNewProductForm(){
+  document.getElementById('admin-new-overlay').classList.remove('active');
+}
+
+async function createAdminProduct(){
+  const errEl = document.getElementById('new-product-error');
+  const btn = document.getElementById('new-product-btn');
+  const categoria = document.getElementById('new-categoria').value.trim();
+  const categoriaEn = document.getElementById('new-categoria-en').value.trim();
+  const name = document.getElementById('new-name').value.trim();
+  const priceRaw = document.getElementById('new-price').value;
+  const price = parseFloat(priceRaw);
+  if(!categoria || !name || !priceRaw || isNaN(price)){
+    errEl.textContent = 'Categoria, nome e prezzo sono obbligatori.';
+    return;
+  }
+  const name_en = document.getElementById('new-name-en').value.trim() || null;
+  const description = document.getElementById('new-desc').value.trim() || null;
+  const description_en = document.getElementById('new-desc-en').value.trim() || null;
+  const available = document.getElementById('new-available').checked;
+  const sameCat = adminItems.filter(x=>x.categoria===categoria);
+  const maxOrder = sameCat.reduce((m,x)=> Math.max(m, x.sort_order ?? 0), -1);
+
+  btn.disabled = true; btn.textContent = 'Creazione...';
+  try{
+    if(categoriaEn){
+      const { error: catErr } = await sb.from('categories').upsert({ name:categoria, name_en:categoriaEn });
+      if(catErr) showToast('⚠️ Prodotto creato, ma traduzione categoria non salvata: ' + catErr.message);
+      else { dynamicCategoryEN[categoria] = categoriaEn; }
+    }
+    const { data, error } = await sb.from('menu_items')
+      .insert({ categoria, name, name_en, price, description, description_en, available, sort_order: maxOrder+1 })
+      .select().single();
+    if(error) throw error;
+    adminItems.push(data);
+    closeNewProductForm();
+    renderAdminItems();
+    showToast('✅ Prodotto creato. Ora puoi aggiungere una foto.');
+  } catch(e){
+    errEl.textContent = 'Errore: ' + (e.message||e);
+  } finally {
+    btn.disabled = false; btn.textContent = 'Crea prodotto';
+  }
+}
+
+/* ── Gestione traduzioni categorie ── */
+function openCategoriesManager(){
+  document.getElementById('cats-manager-error').textContent = '';
+  const cats = [...new Set(adminItems.map(x=>x.categoria))].sort();
+  const list = document.getElementById('cats-manager-list');
+  if(!cats.length){
+    list.innerHTML = '<div class="admin-loading">Nessuna categoria trovata.</div>';
+  } else {
+    list.innerHTML = cats.map(c => `
+      <div style="margin-bottom:10px">
+        <div class="admin-field-label">${escHTML(c)}</div>
+        <input class="admin-input-sm cat-en-input" data-cat="${escAttr(c)}" value="${escAttr(dynamicCategoryEN[c] || CATEGORY_EN[c] || '')}" placeholder="Traduzione in inglese...">
+      </div>`).join('');
+  }
+  document.getElementById('admin-cats-overlay').classList.add('active');
+}
+function closeCategoriesManager(){
+  document.getElementById('admin-cats-overlay').classList.remove('active');
+}
+
+async function saveCategoryTranslations(){
+  const errEl = document.getElementById('cats-manager-error');
+  const btn = document.getElementById('cats-save-btn');
+  const inputs = document.querySelectorAll('#cats-manager-list input[data-cat]');
+  const rows = [...inputs].map(inp => ({ name: inp.dataset.cat, name_en: inp.value.trim() || null })).filter(r=>r.name_en);
+  if(!rows.length){ closeCategoriesManager(); return; }
+  btn.disabled = true; btn.textContent = 'Salvataggio...';
+  try{
+    const { error } = await sb.from('categories').upsert(rows);
+    if(error) throw error;
+    rows.forEach(r => { dynamicCategoryEN[r.name] = r.name_en; });
+    closeCategoriesManager();
+    showToast('✅ Traduzioni categorie salvate.');
+  } catch(e){
+    errEl.textContent = 'Errore: ' + (e.message||e);
+  } finally {
+    btn.disabled = false; btn.textContent = '💾 Salva tutte';
+  }
+}
+
+async function saveAdminItem(id){
+  const btn = document.getElementById('admin-save-'+id);
+  const payload = {
+    name: document.getElementById('admin-name-'+id).value.trim(),
+    name_en: document.getElementById('admin-nameen-'+id).value.trim() || null,
+    description: document.getElementById('admin-desc-'+id).value.trim() || null,
+    description_en: document.getElementById('admin-descen-'+id).value.trim() || null,
+    available: document.getElementById('admin-avail-'+id).checked,
+  };
+  btn.textContent = '...'; btn.disabled = true;
+  try{
+    const { error } = await sb.from('menu_items').update(payload).eq('id', id);
+    if(error) throw error;
+    const item = adminItems.find(x=>x.id===id);
+    if(item) Object.assign(item, payload);
+    btn.textContent = '✓ Salvato'; btn.classList.add('saved');
+    showToast('Prodotto aggiornato.');
+    setTimeout(()=>{ btn.textContent='💾 Salva'; btn.classList.remove('saved'); btn.disabled=false; }, 1500);
+  } catch(e){
+    btn.textContent = '💾 Salva'; btn.disabled = false;
+    showToast('⚠️ Errore salvataggio: ' + (e.message||e));
+  }
+}
+
+/* ── FOTO: compressione lato client + upload via REST diretta (con errori dettagliati) ── */
+
+// Ridimensiona/comprime l'immagine in JPEG prima di caricarla:
+// risolve sia i timeout su rete lenta (file più leggeri) sia i file HEIC
+// dell'iPhone che alcuni browser non riescono a visualizzare.
+function compressImage(file, maxDim = 1600, quality = 0.82){
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      if(width > maxDim || height > maxDim){
+        if(width > height){ height = Math.round(height * maxDim/width); width = maxDim; }
+        else { width = Math.round(width * maxDim/height); height = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(blob => {
+        if(!blob) return reject(new Error('Impossibile elaborare l\'immagine (formato non supportato dal browser).'));
+        resolve(blob);
+      }, 'image/jpeg', quality);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Impossibile leggere il file immagine selezionato.')); };
+    img.src = url;
+  });
+}
+
+// Upload via chiamata REST diretta a Supabase Storage: rispetto all'SDK
+// dà pieno controllo sugli header e soprattutto sul messaggio di errore reale
+// restituito dal server, invece di un generico "Load failed" di Safari.
+async function uploadToStorage(blob, path){
+  const { data: sessionData, error: sessErr } = await sb.auth.getSession();
+  if(sessErr) throw new Error('Sessione non verificabile: ' + sessErr.message);
+  const session = sessionData?.session;
+  if(!session) throw new Error('Sessione admin scaduta. Esci e rifai il login, poi riprova.');
+
+  const encodedPath = path.split('/').map(encodeURIComponent).join('/');
+  const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(STORAGE_BUCKET)}/${encodedPath}`;
+
+  let res;
+  try{
+    res = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${session.access_token}`,
+        'apikey': SUPABASE_KEY,
+        'x-upsert': 'true',
+        'Content-Type': 'image/jpeg'
+      },
+      body: blob
+    });
+  } catch(networkErr){
+    // fetch fallito prima di ricevere risposta: problema di rete/CORS, non di permessi
+    throw new Error('Errore di rete durante il caricamento (' + (networkErr.message||networkErr) + '). Controlla la connessione e riprova; se persiste su Wi-Fi del locale, prova con i dati mobili.');
+  }
+
+  const bodyText = await res.text().catch(()=> '');
+  if(!res.ok){
+    throw new Error(`Il server ha rifiutato il caricamento — HTTP ${res.status}: ${bodyText || res.statusText}`);
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${encodeURIComponent(STORAGE_BUCKET)}/${encodedPath}`;
+}
+
+function pickAdminPhoto(id){
+  adminPendingFileId = id;
+  document.getElementById('admin-photo-input').value = '';
+  document.getElementById('admin-photo-input').click();
+}
+
+document.getElementById('admin-photo-input').addEventListener('change', async (ev) => {
+  const file = ev.target.files[0];
+  const id = adminPendingFileId;
+  if(!file || !id) return;
+  const thumb = document.getElementById('admin-thumb-'+id);
+  const wrap = document.getElementById('admin-thumbwrap-'+id);
+  if(wrap) wrap.classList.add('uploading');
+  if(thumb) thumb.src = URL.createObjectURL(file); // preview immediata locale
+
+  try{
+    const blob = await compressImage(file);
+    const path = `products/${id}-${Date.now()}.jpg`;
+    const newUrl = await uploadToStorage(blob, path);
+    const { error: dbErr } = await sb.from('menu_items').update({ image_url:newUrl }).eq('id', id);
+    if(dbErr) throw new Error('Foto caricata ma non salvata sul prodotto: ' + dbErr.message);
+    const item = adminItems.find(x=>x.id===id);
+    if(item) item.image_url = newUrl;
+    if(thumb) thumb.src = newUrl + '?t=' + Date.now();
+    showToast('📷 Foto aggiornata.');
+  } catch(e){
+    showToast('⚠️ ' + (e.message||e));
+    await loadAdminItems(); // ripristina lo stato reale (annulla la preview locale se fallito)
+  } finally {
+    if(wrap) wrap.classList.remove('uploading');
+  }
+});
+
+/* ── DIAGNOSTICA: verifica passo-passo cosa funziona e cosa no ── */
+function diagRow(icon, label, detail){
+  return `<div class="diag-row"><div class="diag-icon">${icon}</div><div><div class="diag-label">${label}</div>${detail?`<div class="diag-detail">${escHTML(detail)}</div>`:''}</div></div>`;
+}
+
+function openDiagnostics(){ document.getElementById('diag-overlay').classList.add('active'); }
+function closeDiagnostics(){ document.getElementById('diag-overlay').classList.remove('active'); }
+
+async function runDiagnostics(){
+  openDiagnostics();
+  const out = document.getElementById('diag-results');
+  const rows = [];
+
+  // 1. sessione admin
+  let session = null;
+  try{
+    const { data, error } = await sb.auth.getSession();
+    if(error) throw error;
+    session = data?.session || null;
+    if(session){
+      rows.push(diagRow('✅','Sessione admin attiva', 'Utente: ' + session.user.email));
+      try{
+        const payloadB64 = session.access_token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+        const payload = JSON.parse(decodeURIComponent(escape(atob(payloadB64))));
+        const exp = payload.exp ? new Date(payload.exp*1000).toLocaleTimeString() : '?';
+        rows.push(diagRow(payload.role==='authenticated'?'✅':'❌','Ruolo nel token', `role: "${payload.role}" — aud: "${payload.aud}" — scade alle ${exp}`));
+      } catch(decodeErr){
+        rows.push(diagRow('❌','Ruolo nel token', 'Impossibile decodificare: ' + decodeErr.message));
+      }
+    } else {
+      rows.push(diagRow('❌','Nessuna sessione admin attiva', 'Esci e rifai il login.'));
+    }
+  } catch(e){
+    rows.push(diagRow('❌','Errore verifica sessione', e.message||String(e)));
+  }
+  out.innerHTML = rows.join('');
+
+  // 2. lettura tabella menu_items
+  try{
+    const { data, error } = await sb.from('menu_items').select('id').limit(1);
+    if(error) throw error;
+    rows.push(diagRow('✅','Lettura tabella menu_items', `OK (${data.length} riga di test)`));
+  } catch(e){
+    rows.push(diagRow('❌','Lettura tabella menu_items', e.message||String(e)));
+  }
+  out.innerHTML = rows.join('');
+
+  // 3. upload di prova su Storage (file minuscolo, poi eliminato)
+  if(session){
+    const testPath = `diagnostics/test-${Date.now()}.txt`;
+    try{
+      const blob = new Blob(['test'], { type:'text/plain' });
+      const encodedPath = testPath.split('/').map(encodeURIComponent).join('/');
+      const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${encodeURIComponent(STORAGE_BUCKET)}/${encodedPath}`;
+      const res = await fetch(uploadUrl, {
+        method:'POST',
+        headers:{
+          'Authorization':`Bearer ${session.access_token}`,
+          'apikey':SUPABASE_KEY,
+          'x-upsert':'true',
+          'Content-Type':'text/plain'
+        },
+        body: blob
+      });
+      const bodyText = await res.text().catch(()=> '');
+      if(res.ok){
+        rows.push(diagRow('✅','Upload di prova su Storage', `HTTP ${res.status} — bucket "${STORAGE_BUCKET}" scrivibile`));
+        // pulizia
+        await fetch(uploadUrl, { method:'DELETE', headers:{ 'Authorization':`Bearer ${session.access_token}`, 'apikey':SUPABASE_KEY } }).catch(()=>{});
+      } else {
+        rows.push(diagRow('❌','Upload di prova su Storage', `HTTP ${res.status}: ${bodyText || res.statusText}`));
+      }
+    } catch(e){
+      rows.push(diagRow('❌','Upload di prova su Storage', 'Errore di rete: ' + (e.message||String(e))));
+    }
+  } else {
+    rows.push(diagRow('⏭️','Upload di prova su Storage', 'Saltato: nessuna sessione admin attiva'));
+  }
+  out.innerHTML = rows.join('');
+
+  // 4. scrittura di prova su menu_items (aggiorna e poi ripristina lo stesso valore di un prodotto)
+  try{
+    const { data: probe, error: probeErr } = await sb.from('menu_items').select('id,available').limit(1).single();
+    if(probeErr) throw probeErr;
+    const { error: writeErr } = await sb.from('menu_items').update({ available: probe.available }).eq('id', probe.id);
+    if(writeErr) throw writeErr;
+    rows.push(diagRow('✅','Scrittura di prova su menu_items', 'OK'));
+  } catch(e){
+    rows.push(diagRow('❌','Scrittura di prova su menu_items', e.message||String(e)));
+  }
+  out.innerHTML = rows.join('');
+}
+
+// apertura diretta con #admin nell'URL (utile per un bookmark sul telefono)
+async function checkAdminHash(){
+  if(location.hash !== '#admin') return;
+  const { data } = await sb.auth.getSession();
+  if(data?.session){ openAdminPanel(); } else { openAdminLogin(); }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARRELLO & PAGAMENTI — DISABILITATI, NON CANCELLARE
+   Riattivare quando pronti con:
+   - MyPOS account + credenziali reali
+   - Supabase Edge Function mypos-checkout deployata
+   - Stripe (alternativa) con chiavi live
+   ═══════════════════════════════════════════════════════
+let cart = {};
+const cartTotal = () => {
+  const all = menuData.flatMap(c => c.items);
+  return Object.entries(cart).reduce((s,[id,q]) => s+(all.find(x=>x.id==id)?.price||0)*q, 0);
+};
+function chg(id,delta){ ... }
+function openCart(){ ... }
+function goToPayment(){ ... }
+function startMyPOSPayment(){ ... }
+*/
+
+loadMenu();
+checkAdminHash();
+</script>
+</body>
+</html>
